@@ -1,0 +1,108 @@
+{
+  "id": 1772104199625,
+  "name": "вввв",
+  "data": {
+    "points": [
+      {
+        "x": 100,
+        "y": 500,
+        "name": "XXL-1",
+        "oil": 1600,
+        "unlockDay": 0,
+        "size": "xxl",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 200,
+        "y": 200,
+        "name": "XL-1",
+        "oil": 800,
+        "unlockDay": 0,
+        "size": "xl",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 350,
+        "y": 150,
+        "name": "L-1",
+        "oil": 480,
+        "unlockDay": 0,
+        "size": "large",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 750,
+        "y": 200,
+        "name": "L-2",
+        "oil": 480,
+        "unlockDay": 0,
+        "size": "large",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 700,
+        "y": 600,
+        "name": "M-1",
+        "oil": 320,
+        "unlockDay": 0,
+        "size": "medium",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 400,
+        "y": 650,
+        "name": "S-1",
+        "oil": 240,
+        "unlockDay": 0,
+        "size": "small",
+        "type": "tower",
+        "status": "free"
+      },
+      {
+        "x": 650,
+        "y": 350,
+        "name": "L-1",
+        "oil": 300,
+        "unlockDay": 0,
+        "size": "large",
+        "type": "lair",
+        "status": "free"
+      },
+      {
+        "x": 1350,
+        "y": 350,
+        "name": "M-1",
+        "oil": 160,
+        "unlockDay": 0,
+        "size": "medium",
+        "type": "lair",
+        "status": "free"
+      },
+      {
+        "x": 1050,
+        "y": 350,
+        "name": "S-1",
+        "oil": 80,
+        "unlockDay": 0,
+        "size": "small",
+        "type": "lair",
+        "status": "free"
+      }
+    ],
+    "connections": [],
+    "userMarkers": []
+  },
+  "duration_days": 10,
+  "start_time": null,
+  "is_running": false,
+  "total_oil": 0,
+  "last_oil_update": null,
+  "my_alliance_start_id": null,
+  "created_at": "2026-02-26T14:09:59.625020",
+  "updated_at": "2026-02-26T14:09:59.625026"
+}
