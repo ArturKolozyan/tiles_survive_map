@@ -25,15 +25,14 @@
                 <div id="devPanel" class="panel">
                     <div class="section">
                         <h3>Управление картой</h3>
-                        <button id="newMapBtn" class="btn btn-primary">🆕 Новая карта</button>
+                        <button id="newMapBtn" class="btn btn-secondary">🆕 Новая карта</button>
                         <button id="loadMapBtn" class="btn btn-secondary">📂 Загрузить</button>
                         <button id="saveMapBtn" class="btn btn-success">💾 Сохранить</button>
                     </div>
 
                     <div class="section">
                         <h3>Добавить точку</h3>
-                        <button class="btn btn-add" onclick="addPoint('alliance_start')">⭐ Точка начала</button>
-                        <button class="btn btn-add" onclick="addPoint('tower', 'XS', 80)">🔵 Вышка XS (80)</button>
+                        <button class="btn btn-add" onclick="addPoint('alliance_start')">Точка начала</button>
                         <button class="btn btn-add" onclick="addPoint('tower', 'S', 240)">🔵 Вышка S (240)</button>
                         <button class="btn btn-add" onclick="addPoint('tower', 'M', 320)">🔵 Вышка M (320)</button>
                         <button class="btn btn-add" onclick="addPoint('tower', 'L', 480)">🔵 Вышка L (480)</button>
@@ -46,8 +45,8 @@
 
                     <div class="section">
                         <h3>Инструменты</h3>
-                        <button id="connectBtn" class="btn btn-tool">🔗 Соединить</button>
-                        <button id="disconnectBtn" class="btn btn-tool">✂️ Разъединить</button>
+                        <button id="connectBtn" class="btn btn-secondary">🔗 Соединить</button>
+                        <button id="disconnectBtn" class="btn btn-secondary">✂️ Разъединить</button>
                         <button id="cancelBtn" class="btn btn-danger" style="display:none;">❌ Отмена</button>
                     </div>
 
@@ -70,33 +69,18 @@
 
                     <div id="pointEditPanel" class="section" style="display:none;">
                         <h3>Редактировать точку</h3>
-                        <label>Название:</label>
-                        <input type="text" id="pointNameInput" readonly>
                         
-                        <label>Нефть в день:</label>
-                        <input type="number" id="pointOilInput" min="0">
-                        
-                        <label>Открывается (день):</label>
+                        <label>Время открытия (день):</label>
                         <input type="number" id="pointUnlockInput" min="0">
                         
-                        <label>Размер:</label>
-                        <select id="pointSizeInput">
-                            <option value="XS">XS</option>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                        </select>
-                        
-                        <button id="deletePointBtn" class="btn btn-danger">🗑️ Удалить</button>
+                        <button id="deletePointBtn" class="btn btn-danger">🗑️ Удалить точку</button>
                     </div>
                 </div>
 
                 <!-- Game Panel -->
                 <div id="gamePanel" class="panel" style="display:none;">
                     <div class="section">
-                        <h3>🎨 Выбор цвета</h3>
+                        <h3>Выбор цвета</h3>
                         <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Выберите цвет, затем кликните по точке</p>
                         <div class="color-buttons">
                             <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
@@ -107,8 +91,8 @@
                     </div>
 
                     <div class="section">
-                        <h3>🏷️ Метки</h3>
-                        <button class="btn btn-marker marker-no-attack" data-marker="Не атаковать">🛡️ Не атаковать</button>
+                        <h3>Метки</h3>
+                        <button class="btn btn-marker marker-no-attack" data-marker="Не атаковать">🚫 Не атаковать</button>
                         <button class="btn btn-marker marker-attack" data-marker="Атаковать">⚔️ Атаковать</button>
                         <button class="btn btn-marker marker-watch" data-marker="Наблюдаем">👁️ Наблюдаем</button>
                         <button class="btn btn-marker marker-capture" data-marker="Захват остатками">🎯 Захват остатками</button>
@@ -122,25 +106,7 @@
                 <!-- Stats Panel -->
                 <div id="statsPanel" class="panel" style="display:none;">
                     <div class="section">
-                        <h3>🎨 Легенда</h3>
-                        <div class="legend">
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #ddd;"></span>
-                                <span>Белые (свободные)</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #4CAF50;"></span>
-                                <span>Зеленые (захвачены)</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #f44336;"></span>
-                                <span>Красные (бой)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="section">
-                        <h3>📊 Статистика</h3>
+                        <h3>Статистика</h3>
                         <div class="timer-container">
                             <div id="gameTimer" class="timer">Карта не запущена</div>
                             <div id="currentDay" class="day-info"></div>
@@ -162,6 +128,24 @@
         <div class="map-area">
             <canvas id="mapCanvas"></canvas>
             <div id="notification" class="notification"></div>
+            
+            <!-- Point Info Card -->
+            <div id="pointInfoCard" class="point-info-card">
+                <div class="point-info-header">
+                    <h3 id="infoPointName">Точка</h3>
+                    <button class="close-btn" onclick="closePointInfo()">✕</button>
+                </div>
+                <div class="point-info-content">
+                    <div id="infoResources" class="info-resources">
+                        <!-- Resources will be inserted here -->
+                    </div>
+                    
+                    <div class="info-section total-section">
+                        <div class="info-label">Всего:</div>
+                        <div class="info-value total-value" id="infoTotalPoints">0 очков/мин</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

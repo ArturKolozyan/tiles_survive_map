@@ -1,0 +1,282 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Map - Вход</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #1e1e1e;
+        }
+        
+        .auth-box {
+            background: #252525;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        
+        .auth-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4CAF50;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: #333;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .auth-tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background: #45a049;
+        }
+        
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .info-text {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h1>⚔️ Battle Map</h1>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="admin">Админ</button>
+                <button class="auth-tab" data-tab="viewer">Зритель</button>
+            </div>
+            
+            <div id="errorMessage" class="error-message"></div>
+            
+            <!-- Admin Form -->
+            <div id="adminForm" class="auth-form active">
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="adminUsername" placeholder="Введите имя...">
+                </div>
+                <div class="form-group">
+                    <label>Токен (оставьте пустым для регистрации)</label>
+                    <input type="text" id="adminToken" placeholder="Введите токен...">
+                </div>
+                <button class="submit-btn" onclick="adminAuth()">Войти / Зарегистрироваться</button>
+                <p class="info-text">При регистрации сохраните токен - он понадобится для входа</p>
+            </div>
+            
+            <!-- Viewer Form -->
+            <div id="viewerForm" class="auth-form">
+                <div class="form-group">
+                    <label>Код карты</label>
+                    <input type="text" id="viewerCode" placeholder="Введите 6-значный код...">
+                </div>
+                <button class="submit-btn" onclick="viewerAuth()">Войти</button>
+                <p class="info-text">Введите код карты, полученный от администратора</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tab switching
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tabName + 'Form').classList.add('active');
+                
+                hideError();
+            });
+        });
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+        
+        async function adminAuth() {
+            const username = document.getElementById('adminUsername').value.trim();
+            const token = document.getElementById('adminToken').value.trim();
+            
+            if (!username) {
+                showError('Введите имя пользователя');
+                return;
+            }
+            
+            try {
+                if (token) {
+                    // Login
+                    const response = await fetch('/api/admin/login/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        localStorage.setItem('adminToken', token);
+                        localStorage.setItem('username', data.username);
+                        localStorage.setItem('role', 'admin');
+                        window.location.href = '/';
+                    } else {
+                        showError(data.error || 'Ошибка входа');
+                    }
+                } else {
+                    // Register
+                    const response = await fetch('/api/admin/register/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        alert('Регистрация успешна! Сохраните ваш токен:\n\n' + data.token);
+                        localStorage.setItem('adminToken', data.token);
+                        localStorage.setItem('username', data.username);
+                        localStorage.setItem('role', 'admin');
+                        window.location.href = '/';
+                    } else {
+                        showError(data.error || 'Ошибка регистрации');
+                    }
+                }
+            } catch (error) {
+                showError('Ошибка соединения с сервером');
+            }
+        }
+        
+        async function viewerAuth() {
+            const code = document.getElementById('viewerCode').value.trim().toUpperCase();
+            
+            if (!code || code.length !== 6) {
+                showError('Введите корректный 6-значный код');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/map/${code}/`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('viewerCode', code);
+                    localStorage.setItem('role', 'viewer');
+                    localStorage.setItem('mapName', data.name);
+                    window.location.href = '/';
+                } else {
+                    showError('Карта не найдена');
+                }
+            } catch (error) {
+                showError('Ошибка соединения с сервером');
+            }
+        }
+        
+        // Enter key support
+        document.getElementById('adminUsername').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminAuth();
+        });
+        document.getElementById('adminToken').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') adminAuth();
+        });
+        document.getElementById('viewerCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') viewerAuth();
+        });
+    </script>
+</body>
+</html>

@@ -128,7 +128,7 @@ function getMarkerColor(marker) {
 
 function getMarkerEmoji(marker) {
     const emojis = {
-        'Не атаковать': '🛡️',
+        'Не атаковать': '🚫',
         'Атаковать': '⚔️',
         'Наблюдаем': '👁️',
         'Захват остатками': '🎯',
@@ -136,6 +136,99 @@ function getMarkerEmoji(marker) {
         'Набиться для очков': '�'
     };
     return emojis[marker] || '';
+}
+
+function getPointResources(point) {
+    const resources = {
+        tower: {
+            S: [
+                { name: 'Крюк', points: 1, count: 1 },
+                { name: 'Бочка', points: 2, count: 1 }
+            ],
+            M: [
+                { name: 'Крюк', points: 1, count: 2 },
+                { name: 'Бочка', points: 2, count: 1 }
+            ],
+            L: [
+                { name: 'Крюк', points: 1, count: 2 },
+                { name: 'Бочка', points: 2, count: 1 }
+            ],
+            XL: [
+                { name: 'Крюк', points: 1, count: 2 },
+                { name: 'Бочка', points: 2, count: 2 }
+            ],
+            XXL: [
+                { name: 'Крюк', points: 1, count: 2 },
+                { name: 'Бочка', points: 2, count: 2 }
+            ]
+        },
+        lair: {}
+    };
+    
+    if (point.type === 'alliance_start') {
+        return [];
+    }
+    
+    return resources[point.type][point.size] || [];
+}
+
+function calculateTotalPoints(resources) {
+    let total = 0;
+    resources.forEach(res => {
+        total += res.points * res.count;
+    });
+    return total;
+}
+
+function showPointInfo(index) {
+    const point = state.points[index];
+    state.selectedPoint = index;
+    
+    // Title - Type + Size
+    const typeNames = {
+        'alliance_start': 'Точка начала',
+        'tower': 'Вышка',
+        'lair': 'Логово'
+    };
+    const typeName = typeNames[point.type] || point.type;
+    const title = point.type === 'alliance_start' ? point.name : `${typeName} ${point.size}`;
+    document.getElementById('infoPointName').textContent = title;
+    
+    // Resources
+    const resources = getPointResources(point);
+    const resourcesEl = document.getElementById('infoResources');
+    
+    if (resources.length > 0) {
+        resourcesEl.style.display = 'block';
+        resourcesEl.innerHTML = resources.map(res => `
+            <div class="resource-item">
+                <span class="resource-name">${res.name} - ${res.points} очко${res.points > 1 ? 'в' : ''}/мин</span>
+                <span class="resource-value">×${res.count}</span>
+            </div>
+        `).join('');
+        
+        const total = calculateTotalPoints(resources);
+        document.getElementById('infoTotalPoints').textContent = `${total} очков/мин`;
+        document.querySelector('.total-section').style.display = 'flex';
+    } else {
+        resourcesEl.style.display = 'none';
+        document.querySelector('.total-section').style.display = 'none';
+    }
+    
+    // Show edit panel in dev mode
+    if (state.mode === 'dev') {
+        document.getElementById('pointEditPanel').style.display = 'block';
+        document.getElementById('pointUnlockInput').value = point.unlockDay || 0;
+    }
+    
+    // Show card
+    document.getElementById('pointInfoCard').classList.add('show');
+}
+
+function closePointInfo() {
+    document.getElementById('pointInfoCard').classList.remove('show');
+    document.getElementById('pointEditPanel').style.display = 'none';
+    state.selectedPoint = null;
 }
 
 function getPointSize(point) {
@@ -338,11 +431,7 @@ function render() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         
-        if (point.type === 'alliance_start') {
-            ctx.fillText('⭐ ' + point.name, point.x, point.y + size/2 + 5);
-        } else {
-            ctx.fillText(point.name, point.x, point.y + size/2 + 5);
-        }
+        ctx.fillText(point.name, point.x, point.y + size/2 + 5);
         
         // Draw unlock timer BELOW the name - ФОРМАТ: дни:часы:минуты:секунды
         if (state.mapSettings.isRunning) {
@@ -425,7 +514,7 @@ canvas.addEventListener('mousedown', (e) => {
         } else {
             state.selectedPoint = clickedPoint;
             if (state.mode === 'dev') {
-                showPointEdit(clickedPoint);
+                showPointInfo(clickedPoint);
                 state.draggingPoint = clickedPoint;
                 const point = state.points[clickedPoint];
                 state.dragPointOffset = { x: x - point.x, y: y - point.y };
@@ -450,6 +539,10 @@ canvas.addEventListener('mousedown', (e) => {
                     updateStats();
                     render();
                     showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
+                }
+                // Otherwise show info card
+                else {
+                    showPointInfo(clickedPoint);
                 }
             }
         }
@@ -491,23 +584,8 @@ canvas.addEventListener('wheel', (e) => {
 });
 
 // UI Handlers
-function showPointEdit(index) {
-    const point = state.points[index];
-    document.getElementById('pointEditPanel').style.display = 'block';
-    document.getElementById('pointNameInput').value = point.name;
-    document.getElementById('pointOilInput').value = point.oil;
-    document.getElementById('pointUnlockInput').value = point.unlockDay;
-    document.getElementById('pointSizeInput').value = point.size;
-}
 
-
-document.getElementById('pointOilInput').addEventListener('change', (e) => {
-    if (state.selectedPoint !== null) {
-        state.points[state.selectedPoint].oil = parseInt(e.target.value) || 0;
-        render();
-    }
-});
-
+// Point edit panel handlers
 document.getElementById('pointUnlockInput').addEventListener('change', (e) => {
     if (state.selectedPoint !== null) {
         state.points[state.selectedPoint].unlockDay = parseInt(e.target.value) || 0;
@@ -515,16 +593,10 @@ document.getElementById('pointUnlockInput').addEventListener('change', (e) => {
     }
 });
 
-document.getElementById('pointSizeInput').addEventListener('change', (e) => {
-    if (state.selectedPoint !== null) {
-        state.points[state.selectedPoint].size = e.target.value;
-        render();
-    }
-});
-
 document.getElementById('deletePointBtn').addEventListener('click', () => {
     if (state.selectedPoint !== null) {
         deletePoint(state.selectedPoint);
+        closePointInfo();
     }
 });
 
