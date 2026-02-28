@@ -1,0 +1,326 @@
+{
+  "id": 1772286388790,
+  "name": "вфыыыв",
+  "data": {
+    "points": [
+      {
+        "x": -200,
+        "y": 1600,
+        "name": "START-01",
+        "type": "alliance_start",
+        "size": "M",
+        "oil": 0,
+        "unlockDay": 0,
+        "color": "red",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 1600,
+        "name": "START-02",
+        "type": "alliance_start",
+        "size": "M",
+        "oil": 0,
+        "unlockDay": 0,
+        "color": "green",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 2000,
+        "name": "START-03",
+        "type": "alliance_start",
+        "size": "M",
+        "oil": 0,
+        "unlockDay": 0,
+        "color": "red",
+        "marker": ""
+      },
+      {
+        "x": -600,
+        "y": 1600,
+        "name": "XS-01",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "blue",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 1900,
+        "name": "XS-02",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 1800,
+        "name": "XS-03",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 1700,
+        "name": "XS-04",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "blue",
+        "marker": ""
+      },
+      {
+        "x": -300,
+        "y": 1600,
+        "name": "XS-05",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -400,
+        "y": 1600,
+        "name": "XS-06",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -500,
+        "y": 1600,
+        "name": "XS-07",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -300,
+        "y": 1300,
+        "name": "XS-08",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -500,
+        "y": 1300,
+        "name": "XS-09",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "blue",
+        "marker": ""
+      },
+      {
+        "x": -300,
+        "y": 1400,
+        "name": "XS-10",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -400,
+        "y": 1400,
+        "name": "XS-11",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -500,
+        "y": 1400,
+        "name": "XS-12",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -500,
+        "y": 1200,
+        "name": "XS-13",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -400,
+        "y": 1300,
+        "name": "XS-14",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 7,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -700,
+        "y": 1300,
+        "name": "XS-15",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "green",
+        "marker": ""
+      },
+      {
+        "x": -300,
+        "y": 1200,
+        "name": "XS-16",
+        "type": "tower",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      },
+      {
+        "x": -400,
+        "y": 1200,
+        "name": "XXL-01",
+        "type": "tower",
+        "size": "XXL",
+        "oil": 1600,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": ""
+      }
+    ],
+    "connections": [
+      {
+        "from": 1,
+        "to": 17
+      },
+      {
+        "from": 17,
+        "to": 11
+      },
+      {
+        "from": 11,
+        "to": 15
+      },
+      {
+        "from": 15,
+        "to": 19
+      },
+      {
+        "from": 19,
+        "to": 18
+      },
+      {
+        "from": 18,
+        "to": 10
+      },
+      {
+        "from": 10,
+        "to": 16
+      },
+      {
+        "from": 10,
+        "to": 12
+      },
+      {
+        "from": 12,
+        "to": 13
+      },
+      {
+        "from": 13,
+        "to": 14
+      },
+      {
+        "from": 14,
+        "to": 11
+      },
+      {
+        "from": 11,
+        "to": 16
+      },
+      {
+        "from": 7,
+        "to": 12
+      },
+      {
+        "from": 0,
+        "to": 7
+      },
+      {
+        "from": 7,
+        "to": 8
+      },
+      {
+        "from": 8,
+        "to": 9
+      },
+      {
+        "from": 9,
+        "to": 3
+      },
+      {
+        "from": 3,
+        "to": 1
+      },
+      {
+        "from": 1,
+        "to": 6
+      },
+      {
+        "from": 6,
+        "to": 5
+      },
+      {
+        "from": 5,
+        "to": 4
+      },
+      {
+        "from": 4,
+        "to": 2
+      }
+    ]
+  },
+  "duration_days": 10,
+  "start_time": "2026-02-28T00:00:00.000Z",
+  "is_running": true,
+  "my_alliance_start_id": 1,
+  "total_oil": 0,
+  "last_oil_update": null,
+  "created_at": "2026-02-28T16:46:28.790947",
+  "updated_at": "2026-02-28T17:26:22.574172"
+}

@@ -4,240 +4,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tiles Survive - Map Editor</title>
+    <title>Tiles Survive - Battle Map</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <div class="container">
-        <!-- Боковая панель -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>🗺️ Map Editor</h1>
-                
-                <!-- Переключатель режимов -->
+                <h1>⚔️ Battle Map</h1>
                 <div class="mode-switch">
-                    <button id="developerMode" class="mode-btn active">👨‍💻 Разработчик</button>
+                    <button id="devMode" class="mode-btn active">🛠️ Разработка</button>
                     <button id="gameMode" class="mode-btn">🎮 Игра</button>
-                    <button id="statsMode" class="mode-btn">📊 Статистика</button>
                 </div>
             </div>
 
             <div class="sidebar-content">
-                <!-- Панель статистики -->
-                <div id="statsPanel" class="panel" style="display: none;">
+                <!-- Developer Panel -->
+                <div id="devPanel" class="panel">
                     <div class="section">
-                        <h4>📊 Статистика карты</h4>
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-value" id="totalOilAccumulated">0</div>
-                                <div class="stat-label">Всего нефти</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="dailyOilIncome">0</div>
-                                <div class="stat-label">Нефть/день</div>
-                            </div>
-                        </div>
-                        
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-value" id="capturedTowers">0</div>
-                                <div class="stat-label">Вышки</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="capturedLairs">0</div>
-                                <div class="stat-label">Логова</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="totalCaptured">0</div>
-                                <div class="stat-label">Всего захвачено</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="battlePoints">0</div>
-                                <div class="stat-label">Идет бой</div>
-                            </div>
-                        </div>
+                        <h3>Управление картой</h3>
+                        <button id="newMapBtn" class="btn btn-primary">🆕 Новая карта</button>
+                        <button id="loadMapBtn" class="btn btn-secondary">📂 Загрузить</button>
+                        <button id="saveMapBtn" class="btn btn-success">💾 Сохранить</button>
                     </div>
-                </div>
-                
-                <!-- Панель разработчика -->
-                <div id="developerPanel" class="panel">
+
                     <div class="section">
-                        <h4>Инструменты</h4>
-                        <button id="addPointBtn" class="btn btn-primary">➕ Кастомная точка</button>
-                        <button id="connectPointsBtn" class="btn btn-secondary">🔗 Соединить точки</button>
-                        <button id="disconnectPointsBtn" class="btn btn-secondary">✂️ Отсоединить точки</button>
-                        <button id="cancelConnectionBtn" class="btn btn-danger" style="display: none;">❌ Отменить</button>
+                        <h3>Добавить точку</h3>
+                        <button class="btn btn-add" onclick="addPoint('alliance_start')">⭐ Точка начала</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'XS', 80)">🔵 Вышка XS (80)</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'S', 240)">🔵 Вышка S (240)</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'M', 320)">🔵 Вышка M (320)</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'L', 480)">🔵 Вышка L (480)</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'XL', 800)">🔵 Вышка XL (800)</button>
+                        <button class="btn btn-add" onclick="addPoint('tower', 'XXL', 1600)">🔵 Вышка XXL (1600)</button>
+                        <button class="btn btn-add" onclick="addPoint('lair', 'XS', 80)">🟦 Логово XS (80)</button>
+                        <button class="btn btn-add" onclick="addPoint('lair', 'S', 160)">🟦 Логово S (160)</button>
+                        <button class="btn btn-add" onclick="addPoint('lair', 'M', 300)">🟦 Логово M (300)</button>
                     </div>
-                    
+
                     <div class="section">
-                        <h4>Быстрое создание</h4>
-                        <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">🔵 Круг = Вышка | 🟦 Квадрат = Логово</p>
-                        <button class="btn btn-primary" onclick="addPresetPoint('alliance_start', 'medium', 'Точка начала', 0, 'START')">⭐ Точка начала</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('lair', 'medium', 'Логово XS', 80, 'XS')">🟦 Логово XS (80)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('lair', 'medium', 'Логово S', 160, 'S')">🟦 Логово S (160)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('lair', 'medium', 'Логово M', 300, 'M')">🟦 Логово M (300)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('tower', 'medium', 'Вышка S', 240, 'S')">🔵 Вышка S (240)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('tower', 'medium', 'Вышка M', 320, 'M')">🔵 Вышка M (320)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('tower', 'medium', 'Вышка L', 480, 'L')">🔵 Вышка L (480)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('tower', 'medium', 'Вышка XL', 800, 'XL')">🔵 Вышка XL (800)</button>
-                        <button class="btn btn-secondary" onclick="addPresetPoint('tower', 'medium', 'Вышка XXL', 1600, 'XXL')">🔵 Вышка XXL (1600)</button>
+                        <h3>Инструменты</h3>
+                        <button id="connectBtn" class="btn btn-tool">🔗 Соединить</button>
+                        <button id="disconnectBtn" class="btn btn-tool">✂️ Разъединить</button>
+                        <button id="cancelBtn" class="btn btn-danger" style="display:none;">❌ Отмена</button>
                     </div>
-                    
+
                     <div class="section">
-                        <h4>Управление картой</h4>
-                        <button id="saveMapBtn" class="btn btn-success">💾 Сохранить карту</button>
-                        <button id="loadMapBtn" class="btn btn-primary">📂 Загрузить карту</button>
-                        <button id="newMapBtn" class="btn btn-secondary">🆕 Новая карта</button>
-                    </div>
-                    
-                    <div class="section">
-                        <h4>Настройки карты</h4>
-                        <label>Своя точка начала</label>
-                        <select id="myAllianceStart">
+                        <h3>Настройки карты</h3>
+                        <label>Своя точка начала:</label>
+                        <select id="myAllianceSelect">
                             <option value="">Не выбрана</option>
                         </select>
                         
-                        <label>Длительность (дни)</label>
-                        <input type="number" id="mapDuration" value="10" min="1" max="60">
+                        <label>Длительность (дни):</label>
+                        <input type="number" id="durationInput" value="10" min="1" max="60">
                         
-                        <label>Дата старта (00:00 UTC)</label>
-                        <input type="date" id="mapStartDate">
+                        <label>Дата старта (00:00 UTC):</label>
+                        <input type="date" id="startDateInput">
                         
-                        <button id="startMapBtn" class="btn btn-success">▶️ Запустить карту</button>
-                        <button id="stopMapBtn" class="btn btn-danger" style="display: none;">⏹️ Остановить карту</button>
+                        <button id="startMapBtn" class="btn btn-success">▶️ Запустить</button>
+                        <button id="stopMapBtn" class="btn btn-danger" style="display:none;">⏹️ Остановить</button>
                     </div>
 
-                    <div class="section" id="pointSettings" style="display: none;">
-                        <h4>Настройки точки</h4>
+                    <div id="pointEditPanel" class="section" style="display:none;">
+                        <h3>Редактировать точку</h3>
+                        <label>Название:</label>
+                        <input type="text" id="pointNameInput" readonly>
                         
-                        <label>Название точки</label>
-                        <input type="text" id="pointName" placeholder="Название (необязательно)">
+                        <label>Нефть в день:</label>
+                        <input type="number" id="pointOilInput" min="0">
                         
-                        <label>Тип точки</label>
-                        <select id="pointType">
-                            <option value="tower">🔵 Вышка (круг)</option>
-                            <option value="lair">🟦 Логово (квадрат)</option>
-                            <option value="alliance_start">⭐ Точка начала</option>
+                        <label>Открывается (день):</label>
+                        <input type="number" id="pointUnlockInput" min="0">
+                        
+                        <label>Размер:</label>
+                        <select id="pointSizeInput">
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
                         </select>
                         
-                        <div id="oilAmountGroup">
-                            <label>Нефть в день</label>
-                            <input type="number" id="oilAmount" value="60" min="0">
-                        </div>
-                        
-                        <div id="unlockDayGroup">
-                            <label>Открывается через (дней)</label>
-                            <input type="number" id="unlockDay" value="0" min="0">
-                        </div>
-                        
-                        <div id="pointStatusGroup">
-                            <label>Статус</label>
-                            <select id="pointStatus">
-                                <option value="free">⚪ Свободно</option>
-                                <option value="captured">🟢 Захвачено</option>
-                                <option value="battle">🔴 Идет бой</option>
-                            </select>
-                        </div>
-                        
-                        <div id="pointSizeGroup">
-                            <label>Размер точки</label>
-                            <select id="pointSize">
-                                <option value="xs">XS (45px)</option>
-                                <option value="small">S (60px)</option>
-                                <option value="medium" selected>M (75px)</option>
-                                <option value="large">L (105px)</option>
-                                <option value="xl">XL (135px)</option>
-                                <option value="xxl">XXL (165px)</option>
-                            </select>
-                        </div>
-                        
-                        <button id="deletePoint" class="btn btn-danger">🗑️ Удалить точку</button>
+                        <button id="deletePointBtn" class="btn btn-danger">🗑️ Удалить</button>
                     </div>
                 </div>
 
-                <!-- Панель игры -->
-                <div id="gamePanel" class="panel" style="display: none;">
+                <!-- Game Panel -->
+                <div id="gamePanel" class="panel" style="display:none;">
                     <div class="section">
-                        <h4 id="gameTimerTitle">⏱️ Таймер карты</h4>
-                        <div id="gameTimer" style="font-size: 24px; text-align: center; color: #4CAF50; margin: 10px 0;">
-                            Карта не запущена
+                        <h3>🎨 Легенда</h3>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #ddd;"></span>
+                                <span>Белые (свободные)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #4CAF50;"></span>
+                                <span>Зеленые (захвачены)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #2196F3;"></span>
+                                <span>Синие (граница/бой)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #f44336;"></span>
+                                <span>Красные (точки начала врага)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #666;"></span>
+                                <span>Серые (заблокированы по времени)</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="section" id="pointSettingsGame" style="display: none;">
-                        <h4>Настройки точки</h4>
-                        
-                        <label>Статус</label>
-                        <select id="pointStatusGame">
-                            <option value="free">⚪ Свободно</option>
-                            <option value="captured">🟢 Захвачено</option>
-                            <option value="battle">🔴 Идет бой</option>
-                        </select>
-                        
-                        <label>Метка</label>
-                        <select id="pointMarkerGame">
-                            <option value="none">🚫 Без метки</option>
-                            <option value="attack">⚔️ Атаковать</option>
-                            <option value="noattack">🛑 Не атаковать</option>
-                            <option value="observe">👁️ Наблюдаем</option>
-                            <option value="capture">🎯 Захват остатками</option>
-                            <option value="center">🎖️ Набиться в центр</option>
-                            <option value="whale">🐋 Охота на кита</option>
-                        </select>
-                    </div>
-                    
-                    <div class="section">
-                        <button id="clearMarkersGame" class="btn btn-danger">🗑️ Очистить все метки</button>
                     </div>
 
                     <div class="section">
-                        <h4>Количество меток</h4>
-                        <div id="markerCountGame" class="stat-list"></div>
+                        <h3>⏱️ Таймер</h3>
+                        <div id="gameTimer" class="timer">Карта не запущена</div>
+                        <div id="currentDay" class="day-info"></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>📊 Статистика</h3>
+                        <div class="stat-row">
+                            <span>Всего нефти:</span>
+                            <span id="totalOil">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Нефть/день:</span>
+                            <span id="dailyOil">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Белые точки:</span>
+                            <span id="whiteCount">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Зеленые точки:</span>
+                            <span id="capturedCount">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Синие точки:</span>
+                            <span id="battleCount">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Красные точки:</span>
+                            <span id="enemyCount">0</span>
+                        </div>
+                    </div>
+
+                    <div id="pointGamePanel" class="section" style="display:none;">
+                        <h3>Точка: <span id="gamePointName"></span></h3>
+                        
+                        <label>Цвет:</label>
+                        <select id="pointColorGame">
+                            <option value="white">⚪ Белая</option>
+                            <option value="green">🟢 Зеленая</option>
+                            <option value="blue">🔵 Синяя</option>
+                        </select>
+                        
+                        <label>Метка:</label>
+                        <select id="pointMarkerGame">
+                            <option value="">Без метки</option>
+                            <option value="⚔️">⚔️ Атаковать</option>
+                            <option value="🛑">🛑 Не атаковать</option>
+                            <option value="👁️">👁️ Наблюдать</option>
+                            <option value="🎯">🎯 Захват остатками</option>
+                            <option value="🎖️">🎖️ Набиться в центр</option>
+                            <option value="🐋">🐋 Охота на кита</option>
+                            <option value="⚡">⚡ Приоритет</option>
+                            <option value="🔥">🔥 Горячая точка</option>
+                            <option value="❌">❌ Избегать</option>
+                        </select>
+                        
+                        <button id="applyGameChanges" class="btn btn-success">✓ Применить</button>
+                    </div>
+
+                    <div class="section">
+                        <button id="expandBtn" class="btn btn-primary">🔄 Обновить границы</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Область карты -->
+        <!-- Map Canvas -->
         <div class="map-area">
-            <div class="map-controls">
-                <button id="zoomIn" class="control-btn">+</button>
-                <button id="zoomOut" class="control-btn">−</button>
-                <button id="resetView" class="control-btn">⟲</button>
-            </div>
-            <div id="notification" class="notification"></div>
             <canvas id="mapCanvas"></canvas>
+            <div id="notification" class="notification"></div>
         </div>
     </div>
 
-    <!-- Модальное окно сохранения -->
+    <!-- Save Modal -->
     <div id="saveModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>💾 Сохранить карту</h3>
-                <button class="modal-close" onclick="closeSaveModal()">×</button>
+            <h3>💾 Сохранить карту</h3>
+            <label>Название:</label>
+            <input type="text" id="mapNameInput" placeholder="Введите название...">
+            <div class="modal-buttons">
+                <button id="confirmSave" class="btn btn-success">Сохранить</button>
+                <button id="cancelSave" class="btn btn-secondary">Отмена</button>
             </div>
-            <label>Название карты</label>
-            <input type="text" id="mapName" placeholder="Введите название...">
-            <button class="btn btn-success" onclick="saveMap()">Сохранить</button>
         </div>
     </div>
 
-    <!-- Модальное окно загрузки -->
+    <!-- Load Modal -->
     <div id="loadModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>📂 Загрузить карту</h3>
-                <button class="modal-close" onclick="closeLoadModal()">×</button>
-            </div>
+            <h3>📂 Загрузить карту</h3>
             <div id="mapList" class="map-list"></div>
+            <button id="cancelLoad" class="btn btn-secondary">Отмена</button>
         </div>
     </div>
 
-    <script src="{% static 'js/state.js' %}"></script>
-    <script src="{% static 'js/api.js' %}"></script>
-    <script src="{% static 'js/canvas.js' %}"></script>
-    <script src="{% static 'js/ui.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <!-- Battle Resolution Modal -->
+    <div id="battleModal" class="modal">
+        <div class="modal-content">
+            <h3>⚔️ Разрешение боев</h3>
+            <p style="margin-bottom: 15px; color: #aaa;">Отметьте результаты боев за синие точки:</p>
+            <div id="battleList" class="battle-list"></div>
+            <div class="modal-buttons">
+                <button id="confirmBattles" class="btn btn-success">✓ Применить результаты</button>
+                <button id="cancelBattles" class="btn btn-secondary">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
 </body>
 </html>

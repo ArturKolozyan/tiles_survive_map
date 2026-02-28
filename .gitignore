@@ -1,4 +1,4 @@
-# Python
+*.pyc
 __pycache__/
 *.py[cod]
 *$py.class
@@ -22,22 +22,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Django
+.env
+.venv
+db.sqlite3
 *.log
-/static/
-/media/
-
-# Map data (comment out if you want to commit maps)
-# map_data/*.json
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
 .DS_Store
-Thumbs.db
