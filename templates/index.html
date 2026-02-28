@@ -16,6 +16,7 @@
                 <div class="mode-switch">
                     <button id="devMode" class="mode-btn active">🛠️ Разработка</button>
                     <button id="gameMode" class="mode-btn">🎮 Игра</button>
+                    <button id="statsMode" class="mode-btn">📊 Статистика</button>
                 </div>
             </div>
 
@@ -95,6 +96,32 @@
                 <!-- Game Panel -->
                 <div id="gamePanel" class="panel" style="display:none;">
                     <div class="section">
+                        <h3>🎨 Выбор цвета</h3>
+                        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Выберите цвет, затем кликните по точке</p>
+                        <div class="color-buttons">
+                            <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
+                            <button class="color-btn" data-color="green" style="background: #4CAF50; color: white;">🟢 Зеленый</button>
+                            <button class="color-btn" data-color="red" style="background: #f44336; color: white;">🔴 Красный</button>
+                        </div>
+                        <button id="cancelColorBtn" class="btn btn-tool" style="margin-top: 8px; display: none;">❌ Отменить выбор</button>
+                    </div>
+
+                    <div class="section">
+                        <h3>🏷️ Метки</h3>
+                        <button class="btn btn-marker marker-no-attack" data-marker="Не атаковать">🛡️ Не атаковать</button>
+                        <button class="btn btn-marker marker-attack" data-marker="Атаковать">⚔️ Атаковать</button>
+                        <button class="btn btn-marker marker-watch" data-marker="Наблюдаем">👁️ Наблюдаем</button>
+                        <button class="btn btn-marker marker-capture" data-marker="Захват остатками">🎯 Захват остатками</button>
+                        <button class="btn btn-marker marker-whale" data-marker="Охота на кита">🐋 Охота на кита</button>
+                        <button class="btn btn-marker marker-points" data-marker="Набиться для очков">📊 Набиться для очков</button>
+                        <button class="btn btn-marker marker-remove" data-marker="">🗑️ Убрать метку</button>
+                        <button id="cancelMarkerBtn" class="btn btn-danger" style="display:none; margin-top: 8px;">❌ Отмена</button>
+                    </div>
+                </div>
+
+                <!-- Stats Panel -->
+                <div id="statsPanel" class="panel" style="display:none;">
+                    <div class="section">
                         <h3>🎨 Легенда</h3>
                         <div class="legend">
                             <div class="legend-item">
@@ -113,13 +140,11 @@
                     </div>
 
                     <div class="section">
-                        <h3>⏱️ Таймер</h3>
-                        <div id="gameTimer" class="timer">Карта не запущена</div>
-                        <div id="currentDay" class="day-info"></div>
-                    </div>
-
-                    <div class="section">
                         <h3>📊 Статистика</h3>
+                        <div class="timer-container">
+                            <div id="gameTimer" class="timer">Карта не запущена</div>
+                            <div id="currentDay" class="day-info"></div>
+                        </div>
                         <div class="stat-row">
                             <span>Всего нефти:</span>
                             <span id="totalOil">0</span>
@@ -128,37 +153,6 @@
                             <span>Нефть/день:</span>
                             <span id="dailyOil">0</span>
                         </div>
-                    </div>
-
-                    <div class="section">
-                        <h3>🎨 Выбор цвета</h3>
-                        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Выберите цвет, затем кликните по точке</p>
-                        <div class="color-buttons">
-                            <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
-                            <button class="color-btn" data-color="green" style="background: #4CAF50; color: white;">🟢 Зеленый</button>
-                            <button class="color-btn" data-color="red" style="background: #f44336; color: white;">🔴 Красный</button>
-                        </div>
-                        <button id="cancelColorBtn" class="btn btn-tool" style="margin-top: 8px; display: none;">❌ Отменить выбор</button>
-                    </div>
-
-                    <div id="pointGamePanel" class="section" style="display:none;">
-                        <h3>Точка: <span id="gamePointName"></span></h3>
-                        
-                        <label>Метка:</label>
-                        <select id="pointMarkerGame">
-                            <option value="">Без метки</option>
-                            <option value="Атаковать">Атаковать</option>
-                            <option value="Не атаковать">Не атаковать</option>
-                            <option value="Наблюдать">Наблюдать</option>
-                            <option value="Захват остатками">Захват остатками</option>
-                            <option value="Набиться в центр">Набиться в центр</option>
-                            <option value="Охота на кита">Охота на кита</option>
-                            <option value="Приоритет">Приоритет</option>
-                            <option value="Горячая точка">Горячая точка</option>
-                            <option value="Избегать">Избегать</option>
-                        </select>
-                        
-                        <button id="applyGameChanges" class="btn btn-success">✓ Применить метку</button>
                     </div>
                 </div>
             </div>

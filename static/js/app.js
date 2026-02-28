@@ -10,6 +10,8 @@ const state = {
     connectMode: false,
     connectFrom: null,
     disconnectMode: false,
+    markerMode: false,
+    selectedMarker: null,
     camera: { x: 0, y: 0, zoom: 1 },
     isDragging: false,
     dragStart: { x: 0, y: 0 },
@@ -112,6 +114,30 @@ function updateAllianceSelect() {
 }
 
 // Rendering
+function getMarkerColor(marker) {
+    const colors = {
+        'Не атаковать': { bg: '#546E7A', text: '#fff' },
+        'Атаковать': { bg: '#D32F2F', text: '#fff' },
+        'Наблюдаем': { bg: '#1976D2', text: '#fff' },
+        'Захват остатками': { bg: '#F57C00', text: '#fff' },
+        'Охота на кита': { bg: '#0097A7', text: '#fff' },
+        'Набиться для очков': { bg: '#7B1FA2', text: '#fff' }
+    };
+    return colors[marker] || { bg: '#616161', text: '#fff' };
+}
+
+function getMarkerEmoji(marker) {
+    const emojis = {
+        'Не атаковать': '🛡️',
+        'Атаковать': '⚔️',
+        'Наблюдаем': '👁️',
+        'Захват остатками': '🎯',
+        'Охота на кита': '🐋',
+        'Набиться для очков': '�'
+    };
+    return emojis[marker] || '';
+}
+
 function getPointSize(point) {
     if (point.type === 'lair') return 50;
     if (point.type === 'tower') return 60;
@@ -271,7 +297,10 @@ function render() {
         if (point.marker) {
             ctx.save();
             
-            const markerText = point.marker;
+            const emoji = getMarkerEmoji(point.marker);
+            const markerText = emoji + ' ' + point.marker;
+            const markerColors = getMarkerColor(point.marker);
+            
             ctx.font = 'bold 12px Arial';
             const metrics = ctx.measureText(markerText);
             const padding = 8;
@@ -287,14 +316,14 @@ function render() {
             ctx.shadowOffsetY = 2;
             
             // Фон метки
-            ctx.fillStyle = '#FFD700';
+            ctx.fillStyle = markerColors.bg;
             ctx.beginPath();
             ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 4);
             ctx.fill();
             
             // Текст метки
             ctx.shadowColor = 'transparent';
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = markerColors.text;
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -406,16 +435,21 @@ canvas.addEventListener('mousedown', (e) => {
                 const currentDay = getCurrentDay();
                 const isUnlocked = currentDay >= point.unlockDay;
                 
+                // If marker mode is active
+                if (state.markerMode && state.selectedMarker !== null) {
+                    point.marker = state.selectedMarker;
+                    saveMap();
+                    render();
+                    const markerText = state.selectedMarker === '' ? 'убрана' : state.selectedMarker;
+                    showNotification(`Метка "${markerText}" установлена на ${point.name}`);
+                }
                 // If color is selected and point can be changed
-                if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
+                else if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
                     point.color = selectedColor;
                     saveMap();
                     updateStats();
                     render();
                     showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
-                } else {
-                    // Show point panel for marker
-                    showPointGame(clickedPoint);
                 }
             }
         }
@@ -466,14 +500,6 @@ function showPointEdit(index) {
     document.getElementById('pointSizeInput').value = point.size;
 }
 
-function showPointGame(index) {
-    const point = state.points[index];
-    document.getElementById('pointGamePanel').style.display = 'block';
-    document.getElementById('gamePointName').textContent = point.name;
-    
-    document.getElementById('pointMarkerGame').value = point.marker || '';
-}
-
 
 document.getElementById('pointOilInput').addEventListener('change', (e) => {
     if (state.selectedPoint !== null) {
@@ -502,18 +528,6 @@ document.getElementById('deletePointBtn').addEventListener('click', () => {
     }
 });
 
-document.getElementById('applyGameChanges').addEventListener('click', () => {
-    if (state.selectedPoint !== null) {
-        const point = state.points[state.selectedPoint];
-        const newMarker = document.getElementById('pointMarkerGame').value;
-        
-        point.marker = newMarker;
-        
-        saveMap();
-        render();
-        showNotification('Метка изменена');
-    }
-});
 
 document.getElementById('connectBtn').addEventListener('click', () => {
     state.connectMode = true;
@@ -550,16 +564,32 @@ document.getElementById('devMode').addEventListener('click', () => {
     state.mode = 'dev';
     document.getElementById('devMode').classList.add('active');
     document.getElementById('gameMode').classList.remove('active');
+    document.getElementById('statsMode').classList.remove('active');
     document.getElementById('devPanel').style.display = 'block';
     document.getElementById('gamePanel').style.display = 'none';
+    document.getElementById('statsPanel').style.display = 'none';
 });
 
 document.getElementById('gameMode').addEventListener('click', () => {
     state.mode = 'game';
     document.getElementById('gameMode').classList.add('active');
     document.getElementById('devMode').classList.remove('active');
+    document.getElementById('statsMode').classList.remove('active');
     document.getElementById('gamePanel').style.display = 'block';
     document.getElementById('devPanel').style.display = 'none';
+    document.getElementById('statsPanel').style.display = 'none';
+    updateStats();
+    startTimer();
+});
+
+document.getElementById('statsMode').addEventListener('click', () => {
+    state.mode = 'stats';
+    document.getElementById('statsMode').classList.add('active');
+    document.getElementById('devMode').classList.remove('active');
+    document.getElementById('gameMode').classList.remove('active');
+    document.getElementById('statsPanel').style.display = 'block';
+    document.getElementById('devPanel').style.display = 'none';
+    document.getElementById('gamePanel').style.display = 'none';
     updateStats();
     startTimer();
 });
@@ -571,6 +601,12 @@ document.querySelectorAll('.color-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         // Remove selection from all buttons
         document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+        
+        // Deactivate marker mode
+        state.markerMode = false;
+        state.selectedMarker = null;
+        document.querySelectorAll('.btn-marker').forEach(b => b.classList.remove('active'));
+        document.getElementById('cancelMarkerBtn').style.display = 'none';
         
         // Select this button
         btn.classList.add('selected');
@@ -592,6 +628,42 @@ document.getElementById('cancelColorBtn').addEventListener('click', () => {
     document.getElementById('cancelColorBtn').style.display = 'none';
     
     showNotification('Режим выбора цвета отменен');
+});
+
+// Marker selection
+document.querySelectorAll('.btn-marker').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove selection from all marker buttons
+        document.querySelectorAll('.btn-marker').forEach(b => b.classList.remove('active'));
+        
+        // Deactivate color mode
+        selectedColor = null;
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('cancelColorBtn').style.display = 'none';
+        
+        // Select this button
+        btn.classList.add('active');
+        state.markerMode = true;
+        state.selectedMarker = btn.dataset.marker;
+        
+        // Show cancel button
+        document.getElementById('cancelMarkerBtn').style.display = 'block';
+        
+        const markerText = state.selectedMarker === '' ? 'Убрать метку' : state.selectedMarker;
+        showNotification(`Выбрана метка: ${markerText}`);
+    });
+});
+
+document.getElementById('cancelMarkerBtn').addEventListener('click', () => {
+    // Remove selection from all marker buttons
+    document.querySelectorAll('.btn-marker').forEach(b => b.classList.remove('active'));
+    state.markerMode = false;
+    state.selectedMarker = null;
+    
+    // Hide cancel button
+    document.getElementById('cancelMarkerBtn').style.display = 'none';
+    
+    showNotification('Режим меток отменен');
 });
 
 // Map management
@@ -894,22 +966,22 @@ function getCurrentDay() {
 }
 
 function updateStats() {
-    if (!state.mapSettings.isRunning) return;
-    
     let dailyOil = 0;
     
-    const currentDay = getCurrentDay();
-    
-    state.points.forEach(point => {
-        // Skip locked points
-        if (point.unlockDay > currentDay) {
-            return;
-        }
+    if (state.mapSettings.isRunning) {
+        const currentDay = getCurrentDay();
         
-        if (point.color === 'green') {
-            dailyOil += point.oil;
-        }
-    });
+        state.points.forEach(point => {
+            // Skip locked points
+            if (point.unlockDay > currentDay) {
+                return;
+            }
+            
+            if (point.color === 'green') {
+                dailyOil += point.oil;
+            }
+        });
+    }
     
     document.getElementById('totalOil').textContent = state.mapSettings.totalOil;
     document.getElementById('dailyOil').textContent = dailyOil;

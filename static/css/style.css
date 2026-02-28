@@ -153,6 +153,79 @@ body {
     background: #F57C00;
 }
 
+.btn-marker {
+    background: #9C27B0;
+    color: white;
+    font-size: 12px;
+    padding: 8px;
+    font-weight: 600;
+}
+
+.btn-marker:hover {
+    background: #7B1FA2;
+}
+
+.btn-marker.active {
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.marker-no-attack {
+    background: #546E7A;
+}
+
+.marker-no-attack:hover {
+    background: #455A64;
+}
+
+.marker-attack {
+    background: #D32F2F;
+}
+
+.marker-attack:hover {
+    background: #C62828;
+}
+
+.marker-watch {
+    background: #1976D2;
+}
+
+.marker-watch:hover {
+    background: #1565C0;
+}
+
+.marker-capture {
+    background: #F57C00;
+}
+
+.marker-capture:hover {
+    background: #E64A19;
+}
+
+.marker-whale {
+    background: #0097A7;
+}
+
+.marker-whale:hover {
+    background: #00838F;
+}
+
+.marker-points {
+    background: #7B1FA2;
+}
+
+.marker-points:hover {
+    background: #6A1B9A;
+}
+
+.marker-remove {
+    background: #616161;
+}
+
+.marker-remove:hover {
+    background: #424242;
+}
+
 /* Inputs */
 label {
     display: block;
@@ -216,11 +289,15 @@ select:disabled {
     background: #1e1e1e;
     border-radius: 8px;
     font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.timer-container {
+    margin-bottom: 15px;
 }
 
 .day-info {
     text-align: center;
-    margin-top: 10px;
     font-size: 13px;
     color: #aaa;
 }
