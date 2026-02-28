@@ -107,19 +107,7 @@
                             </div>
                             <div class="legend-item">
                                 <span class="legend-color" style="background: #f44336;"></span>
-                                <span>Красные (враг)</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #FFD700;"></span>
-                                <span>Желтая (наша точка начала)</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #666;"></span>
-                                <span>Серые (точки начала врага)</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color" style="background: #444;"></span>
-                                <span>Темно-серые (заблокированы)</span>
+                                <span>Красные (бой)</span>
                             </div>
                         </div>
                     </div>
@@ -140,18 +128,6 @@
                             <span>Нефть/день:</span>
                             <span id="dailyOil">0</span>
                         </div>
-                        <div class="stat-row">
-                            <span>Белые точки:</span>
-                            <span id="whiteCount">0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Зеленые точки:</span>
-                            <span id="capturedCount">0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span>Красные точки:</span>
-                            <span id="enemyCount">0</span>
-                        </div>
                     </div>
 
                     <div class="section">
@@ -161,8 +137,8 @@
                             <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
                             <button class="color-btn" data-color="green" style="background: #4CAF50; color: white;">🟢 Зеленый</button>
                             <button class="color-btn" data-color="red" style="background: #f44336; color: white;">🔴 Красный</button>
-                            <button id="cancelColorBtn" class="btn btn-secondary" style="margin-top: 8px;">❌ Отменить выбор</button>
                         </div>
+                        <button id="cancelColorBtn" class="btn btn-tool" style="margin-top: 8px; display: none;">❌ Отменить выбор</button>
                     </div>
 
                     <div id="pointGamePanel" class="section" style="display:none;">

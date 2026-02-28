@@ -576,6 +576,9 @@ document.querySelectorAll('.color-btn').forEach(btn => {
         btn.classList.add('selected');
         selectedColor = btn.dataset.color;
         
+        // Show cancel button
+        document.getElementById('cancelColorBtn').style.display = 'block';
+        
         showNotification(`Выбран цвет: ${btn.textContent.trim()}`);
     });
 });
@@ -584,6 +587,10 @@ document.getElementById('cancelColorBtn').addEventListener('click', () => {
     // Remove selection from all buttons
     document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
     selectedColor = null;
+    
+    // Hide cancel button
+    document.getElementById('cancelColorBtn').style.display = 'none';
+    
     showNotification('Режим выбора цвета отменен');
 });
 
@@ -889,9 +896,6 @@ function getCurrentDay() {
 function updateStats() {
     if (!state.mapSettings.isRunning) return;
     
-    let white = 0;
-    let green = 0;
-    let red = 0;
     let dailyOil = 0;
     
     const currentDay = getCurrentDay();
@@ -902,23 +906,13 @@ function updateStats() {
             return;
         }
         
-        if (point.color === 'white') {
-            white++;
-        }
         if (point.color === 'green') {
-            green++;
             dailyOil += point.oil;
-        }
-        if (point.color === 'red') {
-            red++;
         }
     });
     
     document.getElementById('totalOil').textContent = state.mapSettings.totalOil;
     document.getElementById('dailyOil').textContent = dailyOil;
-    document.getElementById('whiteCount').textContent = white;
-    document.getElementById('capturedCount').textContent = green;
-    document.getElementById('enemyCount').textContent = red;
 }
 
 let timerInterval = null;
