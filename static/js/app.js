@@ -119,14 +119,17 @@ function getPointSize(point) {
 }
 
 function getPointColor(point, index) {
-    // Check if this is our alliance start point - always green
-    if (point.type === 'alliance_start' && state.mapSettings.myAllianceStartId === index) {
-        return '#4CAF50'; // Green - our start
-    }
-    
-    // Check if this is enemy alliance start point - always red
-    if (point.type === 'alliance_start' && state.mapSettings.myAllianceStartId !== null && state.mapSettings.myAllianceStartId !== index) {
-        return '#f44336'; // Red - enemy start
+    // Alliance start points
+    if (point.type === 'alliance_start') {
+        if (!state.mapSettings.isRunning) {
+            return '#666'; // Gray in dev mode
+        }
+        // In game mode
+        if (state.mapSettings.myAllianceStartId === index) {
+            return '#FFD700'; // Yellow - our start
+        } else {
+            return '#666'; // Gray - enemy start
+        }
     }
     
     if (!state.mapSettings.isRunning) {
@@ -136,16 +139,14 @@ function getPointColor(point, index) {
     // Check if point is unlocked
     const currentDay = getCurrentDay();
     if (point.unlockDay > currentDay) {
-        return '#666'; // Gray - locked
+        return '#444'; // Dark gray - locked
     }
     
     // Use color
     switch (point.color) {
         case 'white': return '#ddd';    // White - free
         case 'green': return '#4CAF50'; // Green - captured
-        case 'blue': return '#2196F3';  // Blue - border
-        case 'red': return '#f44336';   // Red - enemy start
-        case 'gray': return '#666';     // Gray - locked
+        case 'red': return '#f44336';   // Red - enemy
         default: return '#ddd';         // Default white
     }
 }
@@ -155,26 +156,25 @@ function getConnectionColor(from, to) {
         return '#ddd'; // White in dev mode
     }
     
-    const fromColor = from.color;
-    const toColor = to.color;
-    
     // Check if either point is locked
     const currentDay = getCurrentDay();
     const fromLocked = from.unlockDay > currentDay;
     const toLocked = to.unlockDay > currentDay;
     
     if (fromLocked || toLocked) {
-        return '#666'; // Gray if any point is locked
+        return '#444'; // Dark gray if any point is locked
     }
     
-    // If blue and white - connection is white
-    if ((fromColor === 'blue' && toColor === 'white') || (fromColor === 'white' && toColor === 'blue')) {
-        return '#ddd'; // White
-    }
+    // Get colors, treating our alliance start as green
+    let fromColor = from.color;
+    let toColor = to.color;
     
-    // If either is blue (and not white), connection is blue
-    if (fromColor === 'blue' || toColor === 'blue') {
-        return '#2196F3'; // Blue
+    // Treat our alliance start point as green for connection purposes
+    if (from.type === 'alliance_start' && state.points.indexOf(from) === state.mapSettings.myAllianceStartId) {
+        fromColor = 'green';
+    }
+    if (to.type === 'alliance_start' && state.points.indexOf(to) === state.mapSettings.myAllianceStartId) {
+        toColor = 'green';
     }
     
     // If both same color, use that color
@@ -267,44 +267,35 @@ function render() {
             ctx.fillText(point.oil, point.x, point.y);
         }
         
-        // Draw marker label ABOVE the point - БОЛЬШОЙ И ЗАМЕТНЫЙ
+        // Draw marker label ABOVE the point - с текстом и фоном
         if (point.marker) {
             ctx.save();
-            // Тень для эффекта
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 2;
-            ctx.shadowOffsetY = 2;
             
-            // Фон для метки
-            ctx.fillStyle = 'rgba(255, 215, 0, 0.9)'; // Золотой фон
             const markerText = point.marker;
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 12px Arial';
             const metrics = ctx.measureText(markerText);
             const padding = 8;
             const bgWidth = metrics.width + padding * 2;
-            const bgHeight = 32;
+            const bgHeight = 24;
             const bgX = point.x - bgWidth / 2;
-            const bgY = point.y - size/2 - bgHeight - 10;
+            const bgY = point.y - size/2 - bgHeight - 8;
             
-            // Рисуем фон с закругленными углами
+            // Тень
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 2;
+            
+            // Фон метки
+            ctx.fillStyle = '#FFD700';
             ctx.beginPath();
-            const radius = 6;
-            ctx.moveTo(bgX + radius, bgY);
-            ctx.lineTo(bgX + bgWidth - radius, bgY);
-            ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + radius);
-            ctx.lineTo(bgX + bgWidth, bgY + bgHeight - radius);
-            ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - radius, bgY + bgHeight);
-            ctx.lineTo(bgX + radius, bgY + bgHeight);
-            ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - radius);
-            ctx.lineTo(bgX, bgY + radius);
-            ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
-            ctx.closePath();
+            ctx.roundRect(bgX, bgY, bgWidth, bgHeight, 4);
             ctx.fill();
             
-            // Рисуем текст метки
+            // Текст метки
+            ctx.shadowColor = 'transparent';
             ctx.fillStyle = '#000';
-            ctx.font = 'bold 24px Arial';
+            ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(markerText, point.x, bgY + bgHeight / 2);
@@ -410,7 +401,22 @@ canvas.addEventListener('mousedown', (e) => {
                 const point = state.points[clickedPoint];
                 state.dragPointOffset = { x: x - point.x, y: y - point.y };
             } else {
-                showPointGame(clickedPoint);
+                // Game mode
+                const point = state.points[clickedPoint];
+                const currentDay = getCurrentDay();
+                const isUnlocked = currentDay >= point.unlockDay;
+                
+                // If color is selected and point can be changed
+                if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
+                    point.color = selectedColor;
+                    saveMap();
+                    updateStats();
+                    render();
+                    showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
+                } else {
+                    // Show point panel for marker
+                    showPointGame(clickedPoint);
+                }
             }
         }
         render();
@@ -465,38 +471,6 @@ function showPointGame(index) {
     document.getElementById('pointGamePanel').style.display = 'block';
     document.getElementById('gamePointName').textContent = point.name;
     
-    // Check if point is unlocked
-    const currentDay = getCurrentDay();
-    const isUnlocked = currentDay >= point.unlockDay;
-    
-    const colorSelect = document.getElementById('pointColorGame');
-    
-    if (!isUnlocked) {
-        // Locked - disable and show locked message
-        colorSelect.disabled = true;
-        colorSelect.innerHTML = '<option value="white">⚫ Заблокирована</option>';
-        colorSelect.value = 'white';
-    } else if (point.type === 'alliance_start') {
-        // Alliance start points - cannot change color
-        colorSelect.disabled = true;
-        if (state.mapSettings.myAllianceStartId === index) {
-            colorSelect.innerHTML = '<option value="green">🟢 Наша точка начала</option>';
-            colorSelect.value = 'green';
-        } else {
-            colorSelect.innerHTML = '<option value="red">🔴 Точка начала врага</option>';
-            colorSelect.value = 'red';
-        }
-    } else {
-        // Regular points - can change color
-        colorSelect.disabled = false;
-        colorSelect.innerHTML = `
-            <option value="white">⚪ Белая</option>
-            <option value="green">🟢 Зеленая</option>
-            <option value="blue">🔵 Синяя</option>
-        `;
-        colorSelect.value = point.color || 'white';
-    }
-    
     document.getElementById('pointMarkerGame').value = point.marker || '';
 }
 
@@ -531,24 +505,13 @@ document.getElementById('deletePointBtn').addEventListener('click', () => {
 document.getElementById('applyGameChanges').addEventListener('click', () => {
     if (state.selectedPoint !== null) {
         const point = state.points[state.selectedPoint];
-        const newColor = document.getElementById('pointColorGame').value;
         const newMarker = document.getElementById('pointMarkerGame').value;
-        
-        // Check if point is unlocked
-        const currentDay = getCurrentDay();
-        const isUnlocked = currentDay >= point.unlockDay;
-        
-        // Only change color if unlocked and not alliance start
-        if (isUnlocked && point.type !== 'alliance_start') {
-            point.color = newColor;
-        }
         
         point.marker = newMarker;
         
         saveMap();
-        updateStats();
         render();
-        showNotification('Изменения применены');
+        showNotification('Метка изменена');
     }
 });
 
@@ -599,6 +562,29 @@ document.getElementById('gameMode').addEventListener('click', () => {
     document.getElementById('devPanel').style.display = 'none';
     updateStats();
     startTimer();
+});
+
+// Color selection for quick painting
+let selectedColor = null;
+
+document.querySelectorAll('.color-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove selection from all buttons
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+        
+        // Select this button
+        btn.classList.add('selected');
+        selectedColor = btn.dataset.color;
+        
+        showNotification(`Выбран цвет: ${btn.textContent.trim()}`);
+    });
+});
+
+document.getElementById('cancelColorBtn').addEventListener('click', () => {
+    // Remove selection from all buttons
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+    selectedColor = null;
+    showNotification('Режим выбора цвета отменен');
 });
 
 // Map management
@@ -891,156 +877,6 @@ async function deleteMapById(id, event) {
     }
 }
 
-// Territory expansion
-const battleResults = {};
-
-async function expandTerritories() {
-    if (!state.currentMapId || !state.mapSettings.isRunning) {
-        showNotification('Карта не запущена', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/maps/${state.currentMapId}/expand/`, {
-            method: 'POST'
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            state.points = result.points;
-            
-            // If there are battle points to resolve
-            if (result.battle_points && result.battle_points.length > 0) {
-                if (result.message === 'resolve_required') {
-                    showNotification('Сначала разрешите существующие бои');
-                    showBattleModal(result.battle_points);
-                } else {
-                    // New battles created
-                    await saveMap();
-                    updateStats();
-                    render();
-                    showNotification(`Границы обновлены - появилось ${result.battle_points.length} синих точек`);
-                }
-            } else {
-                // No battles
-                await saveMap();
-                updateStats();
-                render();
-                showNotification('Границы обновлены');
-            }
-        } else {
-            showNotification('Ошибка расширения территорий', true);
-        }
-    } catch (error) {
-        console.error('Expand error:', error);
-        showNotification('Ошибка расширения территорий', true);
-    }
-}
-
-function showBattleModal(battlePoints) {
-    const listEl = document.getElementById('battleList');
-    listEl.innerHTML = '';
-    
-    // Clear previous results
-    Object.keys(battleResults).forEach(key => delete battleResults[key]);
-    
-    battlePoints.forEach(battle => {
-        const item = document.createElement('div');
-        item.className = 'battle-item';
-        item.innerHTML = `
-            <div class="battle-item-header">
-                <span class="battle-item-name">${battle.name}</span>
-                <span class="battle-item-oil">⚡ ${battle.oil} нефти</span>
-            </div>
-            <div class="battle-item-buttons">
-                <button class="battle-btn battle-btn-won" data-index="${battle.index}" data-result="won">
-                    🟢 Выиграли
-                </button>
-                <button class="battle-btn battle-btn-lost" data-index="${battle.index}" data-result="lost">
-                    ⚫ Проиграли
-                </button>
-            </div>
-        `;
-        listEl.appendChild(item);
-    });
-    
-    // Add click handlers
-    document.querySelectorAll('.battle-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const index = e.target.dataset.index;
-            const result = e.target.dataset.result;
-            
-            // Remove selection from siblings
-            e.target.parentElement.querySelectorAll('.battle-btn').forEach(b => {
-                b.classList.remove('selected');
-            });
-            
-            // Select this button
-            e.target.classList.add('selected');
-            battleResults[index] = result;
-        });
-    });
-    
-    document.getElementById('battleModal').classList.add('show');
-}
-
-document.getElementById('confirmBattles').addEventListener('click', async () => {
-    // Check if all battles are resolved
-    const battleItems = document.querySelectorAll('.battle-item');
-    const resolvedCount = Object.keys(battleResults).length;
-    
-    if (resolvedCount < battleItems.length) {
-        showNotification(`Отметьте все точки! (${resolvedCount}/${battleItems.length})`, true);
-        return;
-    }
-    
-    if (resolvedCount === 0) {
-        showNotification('Выберите результаты боев', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/maps/${state.currentMapId}/resolve/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ battle_results: battleResults })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            state.points = result.points;
-            
-            // Clear battle results
-            Object.keys(battleResults).forEach(key => delete battleResults[key]);
-            
-            document.getElementById('battleModal').classList.remove('show');
-            
-            await saveMap();
-            updateStats();
-            render();
-            showNotification('Результаты боев применены. Обновляем границы...');
-            
-            // Автоматически обновляем границы после разрешения боев
-            setTimeout(async () => {
-                await expandTerritories();
-            }, 1000);
-        }
-    } catch (error) {
-        console.error('Resolve error:', error);
-        showNotification('Ошибка применения результатов', true);
-    }
-});
-
-document.getElementById('cancelBattles').addEventListener('click', () => {
-    // Clear battle results
-    Object.keys(battleResults).forEach(key => delete battleResults[key]);
-    document.getElementById('battleModal').classList.remove('show');
-});
-
-document.getElementById('expandBtn').addEventListener('click', async () => {
-    await expandTerritories();
-});
-
 // Game logic
 function getCurrentDay() {
     if (!state.mapSettings.startTime) return 0;
@@ -1055,7 +891,6 @@ function updateStats() {
     
     let white = 0;
     let green = 0;
-    let blue = 0;
     let red = 0;
     let dailyOil = 0;
     
@@ -1074,9 +909,6 @@ function updateStats() {
             green++;
             dailyOil += point.oil;
         }
-        if (point.color === 'blue') {
-            blue++;
-        }
         if (point.color === 'red') {
             red++;
         }
@@ -1086,7 +918,6 @@ function updateStats() {
     document.getElementById('dailyOil').textContent = dailyOil;
     document.getElementById('whiteCount').textContent = white;
     document.getElementById('capturedCount').textContent = green;
-    document.getElementById('battleCount').textContent = blue;
     document.getElementById('enemyCount').textContent = red;
 }
 

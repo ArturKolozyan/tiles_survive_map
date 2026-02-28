@@ -106,16 +106,20 @@
                                 <span>Зеленые (захвачены)</span>
                             </div>
                             <div class="legend-item">
-                                <span class="legend-color" style="background: #2196F3;"></span>
-                                <span>Синие (граница/бой)</span>
+                                <span class="legend-color" style="background: #f44336;"></span>
+                                <span>Красные (враг)</span>
                             </div>
                             <div class="legend-item">
-                                <span class="legend-color" style="background: #f44336;"></span>
-                                <span>Красные (точки начала врага)</span>
+                                <span class="legend-color" style="background: #FFD700;"></span>
+                                <span>Желтая (наша точка начала)</span>
                             </div>
                             <div class="legend-item">
                                 <span class="legend-color" style="background: #666;"></span>
-                                <span>Серые (заблокированы по времени)</span>
+                                <span>Серые (точки начала врага)</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: #444;"></span>
+                                <span>Темно-серые (заблокированы)</span>
                             </div>
                         </div>
                     </div>
@@ -145,44 +149,40 @@
                             <span id="capturedCount">0</span>
                         </div>
                         <div class="stat-row">
-                            <span>Синие точки:</span>
-                            <span id="battleCount">0</span>
-                        </div>
-                        <div class="stat-row">
                             <span>Красные точки:</span>
                             <span id="enemyCount">0</span>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🎨 Выбор цвета</h3>
+                        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Выберите цвет, затем кликните по точке</p>
+                        <div class="color-buttons">
+                            <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
+                            <button class="color-btn" data-color="green" style="background: #4CAF50; color: white;">🟢 Зеленый</button>
+                            <button class="color-btn" data-color="red" style="background: #f44336; color: white;">🔴 Красный</button>
+                            <button id="cancelColorBtn" class="btn btn-secondary" style="margin-top: 8px;">❌ Отменить выбор</button>
                         </div>
                     </div>
 
                     <div id="pointGamePanel" class="section" style="display:none;">
                         <h3>Точка: <span id="gamePointName"></span></h3>
                         
-                        <label>Цвет:</label>
-                        <select id="pointColorGame">
-                            <option value="white">⚪ Белая</option>
-                            <option value="green">🟢 Зеленая</option>
-                            <option value="blue">🔵 Синяя</option>
-                        </select>
-                        
                         <label>Метка:</label>
                         <select id="pointMarkerGame">
                             <option value="">Без метки</option>
-                            <option value="⚔️">⚔️ Атаковать</option>
-                            <option value="🛑">🛑 Не атаковать</option>
-                            <option value="👁️">👁️ Наблюдать</option>
-                            <option value="🎯">🎯 Захват остатками</option>
-                            <option value="🎖️">🎖️ Набиться в центр</option>
-                            <option value="🐋">🐋 Охота на кита</option>
-                            <option value="⚡">⚡ Приоритет</option>
-                            <option value="🔥">🔥 Горячая точка</option>
-                            <option value="❌">❌ Избегать</option>
+                            <option value="Атаковать">Атаковать</option>
+                            <option value="Не атаковать">Не атаковать</option>
+                            <option value="Наблюдать">Наблюдать</option>
+                            <option value="Захват остатками">Захват остатками</option>
+                            <option value="Набиться в центр">Набиться в центр</option>
+                            <option value="Охота на кита">Охота на кита</option>
+                            <option value="Приоритет">Приоритет</option>
+                            <option value="Горячая точка">Горячая точка</option>
+                            <option value="Избегать">Избегать</option>
                         </select>
                         
-                        <button id="applyGameChanges" class="btn btn-success">✓ Применить</button>
-                    </div>
-
-                    <div class="section">
-                        <button id="expandBtn" class="btn btn-primary">🔄 Обновить границы</button>
+                        <button id="applyGameChanges" class="btn btn-success">✓ Применить метку</button>
                     </div>
                 </div>
             </div>
@@ -214,19 +214,6 @@
             <h3>📂 Загрузить карту</h3>
             <div id="mapList" class="map-list"></div>
             <button id="cancelLoad" class="btn btn-secondary">Отмена</button>
-        </div>
-    </div>
-
-    <!-- Battle Resolution Modal -->
-    <div id="battleModal" class="modal">
-        <div class="modal-content">
-            <h3>⚔️ Разрешение боев</h3>
-            <p style="margin-bottom: 15px; color: #aaa;">Отметьте результаты боев за синие точки:</p>
-            <div id="battleList" class="battle-list"></div>
-            <div class="modal-buttons">
-                <button id="confirmBattles" class="btn btn-success">✓ Применить результаты</button>
-                <button id="cancelBattles" class="btn btn-secondary">Отмена</button>
-            </div>
         </div>
     </div>
 
