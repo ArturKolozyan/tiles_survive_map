@@ -12,7 +12,9 @@
         "oil": 480,
         "unlockDay": 0,
         "color": "white",
-        "marker": ""
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
       },
       {
         "x": 300,
@@ -23,7 +25,9 @@
         "oil": 800,
         "unlockDay": 0,
         "color": "white",
-        "marker": ""
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
       },
       {
         "x": 200,
@@ -34,7 +38,9 @@
         "oil": 1600,
         "unlockDay": 0,
         "color": "white",
-        "marker": ""
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
       },
       {
         "x": 500,
@@ -45,7 +51,9 @@
         "oil": 320,
         "unlockDay": 5,
         "color": "white",
-        "marker": ""
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
       },
       {
         "x": 600,
@@ -55,8 +63,10 @@
         "size": "S",
         "oil": 240,
         "unlockDay": 0,
-        "color": "white",
-        "marker": ""
+        "color": "green",
+        "marker": "",
+        "currentPoints": 1231,
+        "attackCount": 0
       },
       {
         "x": 100,
@@ -67,17 +77,88 @@
         "oil": 0,
         "unlockDay": 0,
         "color": "white",
-        "marker": ""
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
+      },
+      {
+        "x": 400,
+        "y": 500,
+        "name": "XS-01",
+        "type": "lair",
+        "size": "XS",
+        "oil": 80,
+        "unlockDay": 0,
+        "color": "red",
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
+      },
+      {
+        "x": 500,
+        "y": 500,
+        "name": "S-01",
+        "type": "lair",
+        "size": "S",
+        "oil": 160,
+        "unlockDay": 0,
+        "color": "red",
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
+      },
+      {
+        "x": 600,
+        "y": 500,
+        "name": "M-01",
+        "type": "lair",
+        "size": "M",
+        "oil": 300,
+        "unlockDay": 0,
+        "color": "red",
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
+      },
+      {
+        "x": 600,
+        "y": 400,
+        "name": "S-02",
+        "type": "lair",
+        "size": "S",
+        "oil": 160,
+        "unlockDay": 0,
+        "color": "green",
+        "marker": "",
+        "currentPoints": 0,
+        "attackCount": 0
       }
     ],
-    "connections": []
+    "connections": [
+      {
+        "from": 3,
+        "to": 4
+      },
+      {
+        "from": 0,
+        "to": 3
+      },
+      {
+        "from": 3,
+        "to": 7
+      },
+      {
+        "from": 4,
+        "to": 9
+      }
+    ]
   },
   "duration_days": 10,
   "start_time": "2026-03-01T00:00:00.000Z",
   "is_running": true,
   "my_alliance_start_id": 5,
-  "total_oil": 0,
+  "total_oil": 3500,
   "last_oil_update": null,
   "created_at": "2026-03-01T00:20:34.468520",
-  "updated_at": "2026-03-01T00:55:52.854190"
+  "updated_at": "2026-03-01T11:17:43.127973"
 }

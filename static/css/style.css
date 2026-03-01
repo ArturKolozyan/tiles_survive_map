@@ -259,6 +259,17 @@ select:focus {
     background: #3a3a3a;
 }
 
+/* Hide number input arrows for all number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 select:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -280,6 +291,14 @@ select:disabled {
 .stat-row span:last-child {
     color: #4CAF50;
     font-weight: 600;
+}
+
+.stat-row-green span:last-child {
+    color: #4CAF50;
+}
+
+.stat-row-red span:last-child {
+    color: #f44336;
 }
 
 .timer {
@@ -324,23 +343,25 @@ select:disabled {
 .notification {
     position: absolute;
     top: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
     padding: 12px 20px;
     background: #4CAF50;
     color: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     opacity: 0;
-    transform: translateY(-10px);
     transition: all 0.3s;
     pointer-events: none;
     z-index: 1000;
     font-size: 14px;
+    max-width: 400px;
+    text-align: center;
 }
 
 .notification.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .notification.error {
@@ -578,6 +599,52 @@ select:disabled {
     font-size: 16px;
 }
 
+/* Victory Progress Section */
+.victory-progress-section {
+    margin: 15px 0;
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+.victory-progress-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.victory-progress-item:not(:last-child) {
+    border-bottom: 1px solid #333;
+}
+
+.victory-progress-label {
+    color: #aaa;
+}
+
+.victory-progress-value {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+.can-win-today .victory-progress-value {
+    color: #4CAF50;
+}
+
+.cannot-win-today .victory-progress-value {
+    color: #f44336;
+}
+
+.victory-achieved {
+    text-align: center;
+    color: #4CAF50;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px;
+}
+
 .info-input {
     width: 80px;
     padding: 6px 10px;
@@ -591,6 +658,139 @@ select:disabled {
 .info-input:focus {
     outline: none;
     border-color: #4CAF50;
+}
+
+.calculator-section {
+    margin-top: 15px;
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+.calc-input-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.calc-input-group label {
+    margin: 0;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.calc-input {
+    width: 100px;
+    padding: 8px 10px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 14px;
+    text-align: right;
+}
+
+.calc-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.calc-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #1e1e1e;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calc-result span:first-child {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.calc-result-value {
+    color: #4CAF50;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.calc-hours {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #2a2a2a;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calc-hours span:first-child {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.calc-hours-value {
+    color: #2196F3;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.calc-time {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #2a2a2a;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calc-time span:first-child {
+    color: #aaa;
+    font-size: 13px;
+}
+
+.calc-time-value {
+    color: #4CAF50;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.calc-warning {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #3a2a1a;
+    border: 1px solid #FF9800;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calc-warning span {
+    color: #FFD700;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.calc-victory {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #1a3a1a;
+    border: 1px solid #4CAF50;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.calc-victory span {
+    color: #4CAF50;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 /* Legend */
@@ -639,6 +839,156 @@ select:disabled {
 .color-btn.selected {
     border-color: #FFD700;
     box-shadow: 0 0 0 2px #FFD700;
+}
+
+/* Current Points Section */
+.current-points-section {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+/* Locked Info Section */
+.locked-info-section {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #3a2a1a;
+    border: 2px solid #FF9800;
+    border-radius: 8px;
+}
+
+.locked-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    color: #e0e0e0;
+    font-size: 13px;
+}
+
+.locked-info-item:first-child {
+    justify-content: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #FF9800;
+    margin-bottom: 10px;
+}
+
+.locked-info-item:not(:first-child):not(:last-child) {
+    border-bottom: 1px solid #4a3a2a;
+}
+
+.locked-info-icon {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.locked-info-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFD700;
+}
+
+.locked-info-label {
+    color: #aaa;
+}
+
+.locked-info-value {
+    color: #FFD700;
+    font-weight: 600;
+}
+
+.current-points-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.current-points-header span {
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.btn-reset-point {
+    padding: 6px 12px;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-reset-point:hover {
+    background: #555;
+}
+
+.current-points-input {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.current-points-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.current-points-display {
+    width: 100%;
+    padding: 12px;
+    background: #1e1e1e;
+    border: 1px solid #4CAF50;
+    border-radius: 6px;
+    color: #4CAF50;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Attack Count Section */
+.attack-count-section {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}
+
+.attack-count-header {
+    margin-bottom: 10px;
+}
+
+.attack-count-header span {
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.attack-count-input {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+}
+
+.attack-count-input:focus {
+    outline: none;
+    border-color: #4CAF50;
 }
 
 /* Battle List */

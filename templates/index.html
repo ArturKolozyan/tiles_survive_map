@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiles Survive - Battle Map</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=25">
 </head>
 <body>
     <div class="container">
@@ -28,6 +28,7 @@
                         <button id="newMapBtn" class="btn btn-secondary">🆕 Новая карта</button>
                         <button id="loadMapBtn" class="btn btn-secondary">📂 Загрузить</button>
                         <button id="saveMapBtn" class="btn btn-success">💾 Сохранить</button>
+                        <button id="resetAllPointsBtn" class="btn btn-danger">🔄 Сбросить все очки</button>
                     </div>
 
                     <div class="section">
@@ -115,10 +116,15 @@
                             <span>Всего нефти:</span>
                             <span id="totalOil">0</span>
                         </div>
-                        <div class="stat-row">
-                            <span>Нефть/день:</span>
-                            <span id="dailyOil">0</span>
+                        <div class="stat-row stat-row-green">
+                            <span>Нефть/день (зеленые):</span>
+                            <span id="dailyOilGreen">0</span>
                         </div>
+                        <div class="stat-row stat-row-red">
+                            <span>Нефть/день (красные):</span>
+                            <span id="dailyOilRed">0</span>
+                        </div>
+                        <button class="btn btn-success" style="margin-top: 15px;" onclick="addDailyOil()">➕ Добавить дневную нефть</button>
                     </div>
                 </div>
             </div>
@@ -136,6 +142,20 @@
                     <button class="close-btn" onclick="closePointInfo()">✕</button>
                 </div>
                 <div class="point-info-content">
+                    <!-- Locked Info -->
+                    <div id="lockedInfo" class="locked-info-section" style="display: none;">
+                        <!-- Locked info will be inserted here -->
+                    </div>
+                    
+                    <!-- Current Points -->
+                    <div id="currentPointsSection" class="current-points-section">
+                        <div class="current-points-header">
+                            <span>Текущие очки:</span>
+                            <button class="btn-reset-point" onclick="resetPointScore()">Сбросить</button>
+                        </div>
+                        <div id="currentPointsDisplay" class="current-points-display">0</div>
+                    </div>
+                    
                     <div id="infoResources" class="info-resources">
                         <!-- Resources will be inserted here -->
                     </div>
@@ -143,6 +163,35 @@
                     <div class="info-section total-section">
                         <div class="info-label">Всего:</div>
                         <div class="info-value total-value" id="infoTotalPoints">0 очков/мин</div>
+                    </div>
+                    
+                    <!-- Victory Progress -->
+                    <div id="victoryProgress" class="victory-progress-section" style="display: none;">
+                        <!-- Progress info will be inserted here -->
+                    </div>
+                    
+                    <!-- Calculator -->
+                    <div id="pointCalculator" class="calculator-section" style="display: none;">
+                        <h4 style="color: #4CAF50; font-size: 14px; margin-bottom: 10px;">Калькулятор</h4>
+                        <div class="calc-input-group">
+                            <label>Нужно очков:</label>
+                            <input type="number" id="calcMinutes" min="0" class="calc-input" placeholder="0">
+                        </div>
+                        <div class="calc-result">
+                            <span>Время:</span>
+                            <span id="calcResult" class="calc-result-value">0 мин</span>
+                        </div>
+                        <div id="calcTime" class="calc-time" style="display: none;">
+                            <span>Будет готово в:</span>
+                            <span id="calcTimeValue" class="calc-time-value">00:00</span>
+                        </div>
+                        <div id="calcVictory" class="calc-victory" style="display: none;">
+                            <span></span>
+                        </div>
+                        <div id="calcWarning" class="calc-warning" style="display: none;">
+                            <span></span>
+                        </div>
+                        <button class="btn btn-success" style="margin-top: 10px;" onclick="addCalculatedPoints()">➕ Добавить к текущим</button>
                     </div>
                 </div>
             </div>
@@ -171,6 +220,6 @@
         </div>
     </div>
 
-    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/app.js' %}?v=26"></script>
 </body>
 </html>

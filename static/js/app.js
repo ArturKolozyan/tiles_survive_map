@@ -77,7 +77,8 @@ function addPoint(type, size = 'M', oil = 0) {
         oil: oil,
         unlockDay: 0,
         color: 'white', // Default color: white (free)
-        marker: ''
+        marker: '',
+        currentPoints: 0
     };
     state.points.push(point);
     updateAllianceSelect();
@@ -162,14 +163,42 @@ function getPointResources(point) {
                 { name: 'Бочка', points: 2, count: 2 }
             ]
         },
-        lair: {}
+        lair: {
+            XS: { attackPoints: 4400 },
+            S: { attackPoints: 7400 },
+            M: { attackPoints: 13400 }
+        }
     };
     
     if (point.type === 'alliance_start') {
         return [];
     }
     
+    if (point.type === 'lair') {
+        return null; // Special handling for lairs
+    }
+    
     return resources[point.type][point.size] || [];
+}
+
+function getLairInfo(size) {
+    const lairs = {
+        XS: { attackPoints: 4400 },
+        S: { attackPoints: 7400 },
+        M: { attackPoints: 13400 }
+    };
+    return lairs[size];
+}
+
+function getTowerVictoryCondition(size) {
+    const conditions = {
+        S: { pointsPerMin: 3, victoryPoints: 2160 },
+        M: { pointsPerMin: 4, victoryPoints: 2880 },
+        L: { pointsPerMin: 4, victoryPoints: 2880 },
+        XL: { pointsPerMin: 6, victoryPoints: 4320 },
+        XXL: { pointsPerMin: 6, victoryPoints: 4320 }
+    };
+    return conditions[size];
 }
 
 function calculateTotalPoints(resources) {
@@ -178,6 +207,74 @@ function calculateTotalPoints(resources) {
         total += res.points * res.count;
     });
     return total;
+}
+
+function updateVictoryProgress(point) {
+    const victoryProgressSection = document.getElementById('victoryProgress');
+    const victoryCondition = getTowerVictoryCondition(point.size);
+    
+    if (!victoryCondition) {
+        victoryProgressSection.style.display = 'none';
+        return;
+    }
+    
+    const resources = getPointResources(point);
+    const total = calculateTotalPoints(resources);
+    const currentPoints = point.currentPoints || 0;
+    const neededPoints = victoryCondition.victoryPoints;
+    const remainingPoints = Math.max(0, neededPoints - currentPoints);
+    
+    if (remainingPoints > 0) {
+        const minutesNeeded = Math.ceil(remainingPoints / total);
+        const hoursNeeded = Math.floor(minutesNeeded / 60);
+        const minsNeeded = minutesNeeded % 60;
+        
+        const timeText = hoursNeeded > 0 
+            ? `${hoursNeeded} ч ${minsNeeded} мин` 
+            : `${minutesNeeded} мин`;
+        
+        // Check if can win today
+        const now = new Date();
+        const midnightUTC = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() + 1,
+            0, 0, 0, 0
+        ));
+        const minutesUntilMidnight = (midnightUTC - now) / (1000 * 60);
+        const canWinToday = minutesNeeded <= minutesUntilMidnight;
+        
+        const targetTime = new Date(now.getTime() + minutesNeeded * 60 * 1000);
+        const hours = String(targetTime.getHours()).padStart(2, '0');
+        const mins = String(targetTime.getMinutes()).padStart(2, '0');
+        
+        victoryProgressSection.innerHTML = `
+            <div class="victory-progress-item">
+                <span class="victory-progress-label">До победы осталось:</span>
+                <span class="victory-progress-value">${remainingPoints.toLocaleString('ru-RU')} очков</span>
+            </div>
+            <div class="victory-progress-item">
+                <span class="victory-progress-label">Время до победы:</span>
+                <span class="victory-progress-value">${timeText}</span>
+            </div>
+            <div class="victory-progress-item">
+                <span class="victory-progress-label">Победа в:</span>
+                <span class="victory-progress-value">${hours}:${mins}</span>
+            </div>
+            <div class="victory-progress-item ${canWinToday ? 'can-win-today' : 'cannot-win-today'}">
+                <span class="victory-progress-label">Можно победить сегодня:</span>
+                <span class="victory-progress-value">${canWinToday ? '✅ Да' : '❌ Нет'}</span>
+            </div>
+        `;
+        victoryProgressSection.style.display = 'block';
+    } else {
+        victoryProgressSection.innerHTML = `
+            <div class="victory-achieved">
+                🎉 Победа достигнута!
+            </div>
+        `;
+        victoryProgressSection.style.display = 'block';
+    }
 }
 
 function showPointInfo(index) {
@@ -194,25 +291,166 @@ function showPointInfo(index) {
     const title = point.type === 'alliance_start' ? point.name : `${typeName} ${point.size}`;
     document.getElementById('infoPointName').textContent = title;
     
-    // Resources
-    const resources = getPointResources(point);
-    const resourcesEl = document.getElementById('infoResources');
+    // Check if point is locked
+    const currentDay = getCurrentDay();
+    const isLocked = state.mapSettings.isRunning && point.unlockDay > currentDay;
+    const lockedInfoSection = document.getElementById('lockedInfo');
     
-    if (resources.length > 0) {
-        resourcesEl.style.display = 'block';
-        resourcesEl.innerHTML = resources.map(res => `
-            <div class="resource-item">
-                <span class="resource-name">${res.name} - ${res.points} очко${res.points > 1 ? 'в' : ''}/мин</span>
-                <span class="resource-value">×${res.count}</span>
-            </div>
-        `).join('');
+    if (isLocked) {
+        // Show locked info
+        const start = new Date(state.mapSettings.startTime);
+        const unlockTime = new Date(start.getTime() + point.unlockDay * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        const remaining = unlockTime - now;
         
-        const total = calculateTotalPoints(resources);
-        document.getElementById('infoTotalPoints').textContent = `${total} очков/мин`;
-        document.querySelector('.total-section').style.display = 'flex';
+        if (remaining > 0) {
+            const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            const timeText = `${days}д ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            const unlockDate = unlockTime.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            lockedInfoSection.innerHTML = `
+                <div class="locked-info-item">
+                    <span class="locked-info-icon">🔒</span>
+                    <span class="locked-info-text">Точка закрыта</span>
+                </div>
+                <div class="locked-info-item">
+                    <span class="locked-info-label">Откроется:</span>
+                    <span class="locked-info-value">${unlockDate}</span>
+                </div>
+                <div class="locked-info-item">
+                    <span class="locked-info-label">Осталось:</span>
+                    <span class="locked-info-value">${timeText}</span>
+                </div>
+                <div class="locked-info-item">
+                    <span class="locked-info-label">День открытия:</span>
+                    <span class="locked-info-value">День ${point.unlockDay + 1}</span>
+                </div>
+            `;
+            lockedInfoSection.style.display = 'block';
+        }
     } else {
+        lockedInfoSection.style.display = 'none';
+    }
+    
+    // Show current points section
+    const currentPointsSection = document.getElementById('currentPointsSection');
+    const currentPointsDisplay = document.getElementById('currentPointsDisplay');
+    
+    currentPointsSection.style.display = 'block';
+    currentPointsDisplay.textContent = (point.currentPoints || 0).toLocaleString('ru-RU');
+    
+    const resourcesEl = document.getElementById('infoResources');
+    const totalSection = document.querySelector('.total-section');
+    const calculatorSection = document.getElementById('pointCalculator');
+    
+    // Handle different point types
+    if (point.type === 'lair') {
+        // Lair info
+        const lairInfo = getLairInfo(point.size);
+        if (lairInfo) {
+            resourcesEl.style.display = 'block';
+            resourcesEl.innerHTML = `
+                <div class="resource-item">
+                    <span class="resource-name">Очков за атаку:</span>
+                    <span class="resource-value">${lairInfo.attackPoints.toLocaleString()}</span>
+                </div>
+            `;
+            totalSection.style.display = 'none';
+            
+            // Show calculator for lairs
+            calculatorSection.style.display = 'block';
+            document.getElementById('calcMinutes').value = '';
+            document.getElementById('calcResult').textContent = '0';
+            document.getElementById('calcTime').style.display = 'none';
+            document.getElementById('calcWarning').style.display = 'none';
+            
+            // Change label for lairs
+            const calcLabel = calculatorSection.querySelector('.calc-input-group label');
+            calcLabel.textContent = 'Нужно очков:';
+            
+            const calcResultLabel = calculatorSection.querySelector('.calc-result span:first-child');
+            calcResultLabel.textContent = 'Атак:';
+            
+            // Setup calculator for attacks
+            setupLairCalculator(lairInfo.attackPoints);
+        }
+    } else if (point.type === 'tower') {
+        // Tower info
+        const resources = getPointResources(point);
+        const victoryCondition = getTowerVictoryCondition(point.size);
+        
+        if (resources && resources.length > 0) {
+            resourcesEl.style.display = 'block';
+            
+            let html = resources.map(res => `
+                <div class="resource-item">
+                    <span class="resource-name">${res.name} - ${res.points} очко${res.points > 1 ? 'в' : ''}/мин</span>
+                    <span class="resource-value">×${res.count}</span>
+                </div>
+            `).join('');
+            
+            // Add victory condition
+            if (victoryCondition) {
+                html += `
+                    <div class="resource-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #444;">
+                        <span class="resource-name">Победа при:</span>
+                        <span class="resource-value">${victoryCondition.victoryPoints.toLocaleString()}+</span>
+                    </div>
+                `;
+            }
+            
+            resourcesEl.innerHTML = html;
+            
+            const total = calculateTotalPoints(resources);
+            document.getElementById('infoTotalPoints').textContent = `${total} очков/мин`;
+            totalSection.style.display = 'flex';
+            
+            // Show victory progress info
+            updateVictoryProgress(point);
+            
+            // Show calculator for towers
+            calculatorSection.style.display = 'block';
+            document.getElementById('calcMinutes').value = '';
+            document.getElementById('calcResult').textContent = '0 мин';
+            document.getElementById('calcTime').style.display = 'none';
+            document.getElementById('calcWarning').style.display = 'none';
+            document.getElementById('calcVictory').style.display = 'none';
+            
+            // Change label for towers
+            const calcLabel = calculatorSection.querySelector('.calc-input-group label');
+            calcLabel.textContent = 'Нужно очков:';
+            
+            const calcResultLabel = calculatorSection.querySelector('.calc-result span:first-child');
+            calcResultLabel.textContent = 'Время:';
+            
+            // Setup calculator
+            setupCalculator(total);
+        }
+    } else {
+        // Alliance start - no resources
         resourcesEl.style.display = 'none';
-        document.querySelector('.total-section').style.display = 'none';
+        totalSection.style.display = 'none';
+        calculatorSection.style.display = 'none';
+        
+        // Hide current points section for alliance start
+        currentPointsSection.style.display = 'none';
+        
+        // Hide victory progress
+        const victoryProgressSection = document.getElementById('victoryProgress');
+        if (victoryProgressSection) {
+            victoryProgressSection.style.display = 'none';
+        }
     }
     
     // Show edit panel in dev mode
@@ -223,6 +461,114 @@ function showPointInfo(index) {
     
     // Show card
     document.getElementById('pointInfoCard').classList.add('show');
+}
+
+function setupCalculator(pointsPerMin) {
+    const calcInput = document.getElementById('calcMinutes');
+    const calcResult = document.getElementById('calcResult');
+    const calcTime = document.getElementById('calcTime');
+    const calcTimeValue = document.getElementById('calcTimeValue');
+    const calcWarning = document.getElementById('calcWarning');
+    const calcVictory = document.getElementById('calcVictory');
+    
+    // Remove old listener
+    const newInput = calcInput.cloneNode(true);
+    calcInput.parentNode.replaceChild(newInput, calcInput);
+    
+    // Add new listener
+    newInput.addEventListener('input', (e) => {
+        const targetPoints = parseFloat(e.target.value) || 0;
+        const minutes = targetPoints / pointsPerMin;
+        
+        // Show time in hours and minutes format
+        const totalHours = Math.floor(minutes / 60);
+        const remainingMinutes = Math.ceil(minutes % 60);
+        if (totalHours > 0) {
+            calcResult.textContent = `${totalHours} ч ${remainingMinutes} мин`;
+        } else {
+            calcResult.textContent = `${Math.ceil(minutes)} мин`;
+        }
+        
+        // Calculate target time
+        if (minutes > 0) {
+            const now = new Date();
+            const targetTime = new Date(now.getTime() + minutes * 60 * 1000);
+            
+            // Format time
+            const hours = String(targetTime.getHours()).padStart(2, '0');
+            const mins = String(targetTime.getMinutes()).padStart(2, '0');
+            calcTimeValue.textContent = `${hours}:${mins}`;
+            calcTime.style.display = 'flex';
+            
+            // Check victory condition
+            if (state.selectedPoint !== null) {
+                const point = state.points[state.selectedPoint];
+                const currentPoints = point.currentPoints || 0;
+                const totalPoints = currentPoints + targetPoints;
+                const victoryCondition = getTowerVictoryCondition(point.size);
+                
+                if (victoryCondition && totalPoints >= victoryCondition.victoryPoints) {
+                    const victorySpan = calcVictory.querySelector('span');
+                    victorySpan.innerHTML = `🎉 Победа! Всего очков: ${totalPoints.toLocaleString('ru-RU')} (нужно ${victoryCondition.victoryPoints.toLocaleString('ru-RU')}+)`;
+                    calcVictory.style.display = 'flex';
+                } else {
+                    calcVictory.style.display = 'none';
+                }
+            }
+            
+            // Check if crosses midnight UTC
+            const nowUTC = new Date();
+            const midnightUTC = new Date(Date.UTC(
+                nowUTC.getUTCFullYear(),
+                nowUTC.getUTCMonth(),
+                nowUTC.getUTCDate() + 1,
+                0, 0, 0, 0
+            ));
+            
+            const minutesUntilMidnight = (midnightUTC - nowUTC) / (1000 * 60);
+            
+            if (minutes > minutesUntilMidnight) {
+                // Calculate max points until midnight
+                const maxPoints = Math.floor(minutesUntilMidnight * pointsPerMin);
+                const hoursUntilMidnight = Math.floor(minutesUntilMidnight / 60);
+                const minsUntilMidnight = Math.ceil(minutesUntilMidnight % 60);
+                
+                const timeText = hoursUntilMidnight > 0 
+                    ? `${hoursUntilMidnight} ч ${minsUntilMidnight} мин` 
+                    : `${Math.ceil(minutesUntilMidnight)} мин`;
+                
+                const warningSpan = calcWarning.querySelector('span');
+                warningSpan.innerHTML = `⚠️ До 00:00 UTC осталось ${timeText}<br>Максимум очков сегодня: ${maxPoints.toLocaleString('ru-RU')}`;
+                calcWarning.style.display = 'flex';
+            } else {
+                calcWarning.style.display = 'none';
+            }
+        } else {
+            calcTime.style.display = 'none';
+            calcWarning.style.display = 'none';
+            calcVictory.style.display = 'none';
+        }
+    });
+}
+
+function setupLairCalculator(pointsPerAttack) {
+    const calcInput = document.getElementById('calcMinutes');
+    const calcResult = document.getElementById('calcResult');
+    const calcTime = document.getElementById('calcTime');
+    
+    // Remove old listener
+    const newInput = calcInput.cloneNode(true);
+    calcInput.parentNode.replaceChild(newInput, calcInput);
+    
+    // Add new listener
+    newInput.addEventListener('input', (e) => {
+        const targetPoints = parseFloat(e.target.value) || 0;
+        const attacks = Math.ceil(targetPoints / pointsPerAttack);
+        calcResult.textContent = attacks.toLocaleString();
+        
+        // Hide time for lairs (we don't know attack frequency)
+        calcTime.style.display = 'none';
+    });
 }
 
 function closePointInfo() {
@@ -964,6 +1310,10 @@ async function loadMapById(id) {
                     point.color = 'white';
                 }
             }
+            // Initialize currentPoints if not present
+            if (point.currentPoints === undefined) {
+                point.currentPoints = 0;
+            }
         });
         
         // Recalculate counters
@@ -1038,7 +1388,8 @@ function getCurrentDay() {
 }
 
 function updateStats() {
-    let dailyOil = 0;
+    let dailyOilGreen = 0;
+    let dailyOilRed = 0;
     
     if (state.mapSettings.isRunning) {
         const currentDay = getCurrentDay();
@@ -1050,13 +1401,16 @@ function updateStats() {
             }
             
             if (point.color === 'green') {
-                dailyOil += point.oil;
+                dailyOilGreen += point.oil;
+            } else if (point.color === 'red') {
+                dailyOilRed += point.oil;
             }
         });
     }
     
     document.getElementById('totalOil').textContent = state.mapSettings.totalOil;
-    document.getElementById('dailyOil').textContent = dailyOil;
+    document.getElementById('dailyOilGreen').textContent = dailyOilGreen;
+    document.getElementById('dailyOilRed').textContent = dailyOilRed;
 }
 
 let timerInterval = null;
@@ -1111,6 +1465,90 @@ function showNotification(message, isError = false) {
     setTimeout(() => {
         notif.classList.remove('show');
     }, 3000);
+}
+
+// Point score management
+window.resetPointScore = function() {
+    if (state.selectedPoint !== null) {
+        const point = state.points[state.selectedPoint];
+        point.currentPoints = 0;
+        document.getElementById('currentPointsDisplay').textContent = '0';
+        
+        // Update victory progress if it's a tower
+        if (point.type === 'tower') {
+            updateVictoryProgress(point);
+        }
+        
+        saveMap();
+        showNotification(`Очки точки ${point.name} сброшены`);
+    }
+}
+
+window.addCalculatedPoints = function() {
+    if (state.selectedPoint !== null) {
+        const point = state.points[state.selectedPoint];
+        const currentPointsDisplay = document.getElementById('currentPointsDisplay');
+        const calcInput = document.getElementById('calcMinutes');
+        const targetPoints = parseInt(calcInput.value.replace(/\s/g, '')) || 0;
+        const currentPoints = point.currentPoints || 0;
+        
+        // Add points
+        point.currentPoints = currentPoints + targetPoints;
+        
+        // Update display with formatted value
+        currentPointsDisplay.textContent = point.currentPoints.toLocaleString('ru-RU');
+        
+        // Clear calculator input
+        calcInput.value = '';
+        document.getElementById('calcResult').textContent = '0 мин';
+        document.getElementById('calcTime').style.display = 'none';
+        document.getElementById('calcWarning').style.display = 'none';
+        document.getElementById('calcVictory').style.display = 'none';
+        
+        // Update victory progress if it's a tower
+        if (point.type === 'tower') {
+            updateVictoryProgress(point);
+        }
+        
+        saveMap();
+        showNotification(`Добавлено ${targetPoints.toLocaleString('ru-RU')} очков. Всего: ${point.currentPoints.toLocaleString('ru-RU')}`);
+    }
+}
+
+// Reset all points button handler
+document.getElementById('resetAllPointsBtn').addEventListener('click', () => {
+    if (confirm('Сбросить очки всех точек? Это действие нельзя отменить.')) {
+        state.points.forEach(point => {
+            point.currentPoints = 0;
+        });
+        
+        // Update current point display if card is open
+        if (state.selectedPoint !== null) {
+            document.getElementById('currentPointsDisplay').textContent = '0';
+            const point = state.points[state.selectedPoint];
+            if (point.type === 'tower') {
+                updateVictoryProgress(point);
+            }
+        }
+        
+        saveMap();
+        showNotification('Очки всех точек сброшены');
+    }
+});
+
+// Add daily oil button handler
+window.addDailyOil = function() {
+    const dailyOilGreen = parseInt(document.getElementById('dailyOilGreen').textContent) || 0;
+    
+    if (dailyOilGreen === 0) {
+        showNotification('Нет нефти для добавления', true);
+        return;
+    }
+    
+    state.mapSettings.totalOil += dailyOilGreen;
+    document.getElementById('totalOil').textContent = state.mapSettings.totalOil;
+    saveMap();
+    showNotification(`Добавлено ${dailyOilGreen} нефти к общей`);
 }
 
 // Initialize
