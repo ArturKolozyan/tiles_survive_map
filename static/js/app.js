@@ -263,7 +263,7 @@ function updateVictoryProgress(point) {
             </div>
             <div class="victory-progress-item ${canWinToday ? 'can-win-today' : 'cannot-win-today'}">
                 <span class="victory-progress-label">Можно победить сегодня:</span>
-                <span class="victory-progress-value">${canWinToday ? '✅ Да' : '❌ Нет'}</span>
+                <span class="victory-progress-value">${canWinToday ? 'Да' : 'Нет'}</span>
             </div>
         `;
         victoryProgressSection.style.display = 'block';
@@ -374,6 +374,12 @@ function showPointInfo(index) {
             document.getElementById('calcResult').textContent = '0';
             document.getElementById('calcTime').style.display = 'none';
             document.getElementById('calcWarning').style.display = 'none';
+            
+            // Hide victory progress for lairs
+            const victoryProgressSection = document.getElementById('victoryProgress');
+            if (victoryProgressSection) {
+                victoryProgressSection.style.display = 'none';
+            }
             
             // Change label for lairs
             const calcLabel = calculatorSection.querySelector('.calc-input-group label');
@@ -1414,6 +1420,8 @@ function updateStats() {
 }
 
 let timerInterval = null;
+let lastDay = -1; // Track the last known day
+let dayChangeNotified = false; // Track if notification was shown for current day
 
 function stopTimer() {
     if (timerInterval) {
@@ -1429,6 +1437,10 @@ function startTimer() {
         document.getElementById('gameTimer').textContent = 'Карта не запущена';
         return;
     }
+    
+    // Initialize lastDay
+    lastDay = getCurrentDay();
+    dayChangeNotified = false;
     
     const updateTimer = () => {
         const start = new Date(state.mapSettings.startTime);
@@ -1452,10 +1464,45 @@ function startTimer() {
         
         const currentDay = getCurrentDay();
         document.getElementById('currentDay').textContent = `День ${currentDay + 1} из ${state.mapSettings.durationDays}`;
+        
+        // Check if day changed
+        if (lastDay !== -1 && currentDay > lastDay) {
+            // Day changed! Show notification
+            dayChangeNotified = true;
+            updateDayChangeWarning();
+            render(); // Re-render to update locked/unlocked points
+        }
+        lastDay = currentDay;
+        
+        // Update warning visibility
+        updateDayChangeWarning();
     };
     
     updateTimer();
     timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateDayChangeWarning() {
+    const warningSection = document.getElementById('dayChangeWarning');
+    if (!warningSection) return;
+    
+    if (dayChangeNotified && state.mapSettings.isRunning) {
+        const dailyOilGreen = parseInt(document.getElementById('dailyOilGreen').textContent) || 0;
+        const currentDay = getCurrentDay();
+        
+        warningSection.innerHTML = `
+            <div class="day-change-warning-content">
+                <div class="day-change-icon">⚠️</div>
+                <div class="day-change-text">
+                    <div class="day-change-title">Новый день ${currentDay + 1}!</div>
+                    <div class="day-change-subtitle">Не забудьте добавить дневную нефть: ${dailyOilGreen}</div>
+                </div>
+            </div>
+        `;
+        warningSection.style.display = 'block';
+    } else {
+        warningSection.style.display = 'none';
+    }
 }
 
 function showNotification(message, isError = false) {
@@ -1545,10 +1592,19 @@ window.addDailyOil = function() {
         return;
     }
     
+    if (!confirm(`Добавить ${dailyOilGreen} нефти к общей? Это действие нельзя отменить.`)) {
+        return;
+    }
+    
     state.mapSettings.totalOil += dailyOilGreen;
     document.getElementById('totalOil').textContent = state.mapSettings.totalOil;
+    
+    // Hide day change warning
+    dayChangeNotified = false;
+    updateDayChangeWarning();
+    
     saveMap();
-    showNotification(`Добавлено ${dailyOilGreen} нефти к общей`);
+    showNotification(`Добавлено ${dailyOilGreen} нефти. Всего: ${state.mapSettings.totalOil}`);
 }
 
 // Initialize
