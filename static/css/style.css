@@ -1196,8 +1196,8 @@ select:disabled {
         position: fixed;
         left: -100%;
         top: 0;
-        width: 85%;
-        max-width: 320px;
+        width: 90%;
+        max-width: 360px;
         height: 100vh;
         z-index: 2000;
         transition: left 0.3s ease;
@@ -1217,8 +1217,9 @@ select:disabled {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.6);
         z-index: 1999;
+        backdrop-filter: blur(2px);
     }
     
     .sidebar-overlay.show {
@@ -1232,67 +1233,73 @@ select:disabled {
     }
     
     .sidebar-header {
-        padding: 15px;
+        padding: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
     
     .sidebar-header h1 {
-        font-size: 16px;
-        margin-bottom: 10px;
+        font-size: 18px;
+        margin-bottom: 12px;
     }
     
     .user-info {
-        padding: 8px;
-        margin-bottom: 10px;
-        flex-wrap: wrap;
+        padding: 10px;
+        margin-bottom: 12px;
+        flex-direction: column;
         gap: 8px;
     }
     
     .user-info span {
-        font-size: 12px;
-        flex: 1 1 100%;
+        font-size: 14px;
         text-align: center;
     }
     
     .btn-logout {
-        padding: 6px 12px;
-        font-size: 12px;
-        flex: 1 1 100%;
+        padding: 8px 16px;
+        font-size: 13px;
+        width: 100%;
     }
     
     .mode-switch {
-        gap: 6px;
+        gap: 8px;
     }
     
     .mode-btn {
-        padding: 8px 4px;
-        font-size: 11px;
+        padding: 12px 8px;
+        font-size: 12px;
+        font-weight: 600;
     }
     
     .sidebar-content {
-        padding: 10px;
+        padding: 12px;
+        padding-bottom: 80px;
     }
     
     .section {
-        padding: 12px;
-        margin-bottom: 15px;
+        padding: 14px;
+        margin-bottom: 16px;
     }
     
     .section h3 {
-        font-size: 13px;
-        margin-bottom: 10px;
+        font-size: 14px;
+        margin-bottom: 12px;
     }
     
     /* Кнопки */
     .btn {
-        padding: 12px;
-        font-size: 14px;
+        padding: 14px;
+        font-size: 15px;
         margin-bottom: 10px;
-        min-height: 44px;
+        min-height: 48px;
+        font-weight: 600;
     }
     
     .btn-add {
-        font-size: 13px;
-        padding: 10px;
+        font-size: 14px;
+        padding: 12px;
+        min-height: 44px;
     }
     
     /* Карта */
@@ -1308,22 +1315,30 @@ select:disabled {
     
     /* Кнопка центрирования */
     .center-map-btn {
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        font-size: 22px;
+        bottom: 100px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
     
     /* Уведомления */
     .notification {
-        max-width: 90%;
-        font-size: 13px;
-        padding: 10px 15px;
+        max-width: calc(100% - 32px);
+        font-size: 14px;
+        padding: 12px 16px;
         top: 80px;
+        left: 16px;
+        right: 16px;
+        transform: translateX(0) translateY(-10px);
     }
     
-    /* Карточка информации о точке */
+    .notification.show {
+        transform: translateX(0) translateY(0);
+    }
+    
+    /* Карточка информации о точке - УЛУЧШЕННЫЙ ДИЗАЙН */
     .point-info-card {
         position: fixed;
         top: auto;
@@ -1332,37 +1347,79 @@ select:disabled {
         left: 0;
         transform: none;
         width: 100%;
-        max-height: 75vh;
-        border-radius: 16px 16px 0 0;
+        max-height: 80vh;
+        border-radius: 20px 20px 0 0;
         z-index: 1500;
+        box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+    }
+    
+    /* Добавляем индикатор для свайпа */
+    .point-info-card::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: #666;
+        border-radius: 2px;
     }
     
     .point-info-header {
-        padding: 15px;
+        padding: 20px 16px 16px;
+        position: sticky;
+        top: 0;
+        background: #252525;
+        z-index: 10;
     }
     
     .point-info-header h3 {
-        font-size: 16px;
+        font-size: 18px;
+    }
+    
+    .close-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
     }
     
     .point-info-content {
-        padding: 15px;
-        max-height: calc(75vh - 60px);
+        padding: 16px;
+        max-height: calc(80vh - 80px);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Улучшенные секции в карточке */
+    .current-points-section,
+    .locked-info-section,
+    .info-resources,
+    .total-section,
+    .victory-progress-section,
+    .calculator-section {
+        margin-bottom: 16px;
+        padding: 16px;
+    }
+    
+    .current-points-display {
+        font-size: 24px;
+        padding: 16px;
     }
     
     /* Модальные окна */
     .modal-content {
-        min-width: 90%;
-        max-width: 90%;
+        min-width: calc(100% - 32px);
+        max-width: calc(100% - 32px);
         padding: 20px;
-        margin: 20px;
-        max-height: 85vh;
+        margin: 16px;
+        max-height: calc(100vh - 32px);
+        border-radius: 16px;
     }
     
     .modal-content h3 {
-        font-size: 16px;
-        margin-bottom: 15px;
+        font-size: 18px;
+        margin-bottom: 16px;
     }
     
     /* Инпуты */
@@ -1370,141 +1427,192 @@ select:disabled {
     input[type="number"],
     input[type="date"],
     select {
-        padding: 12px;
-        font-size: 16px; /* Предотвращает зум на iOS */
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 8px;
     }
     
     label {
-        font-size: 13px;
+        font-size: 14px;
+        margin-top: 12px;
     }
     
     /* Статистика */
     .timer {
-        font-size: 20px;
-        padding: 12px;
+        font-size: 22px;
+        padding: 16px;
     }
     
     .stat-row {
-        font-size: 14px;
-        padding: 12px 0;
+        font-size: 15px;
+        padding: 14px 0;
     }
     
     /* Калькулятор */
     .calc-input {
-        width: 120px;
-        padding: 10px;
+        width: 140px;
+        padding: 12px;
         font-size: 16px;
+    }
+    
+    .calc-result {
+        padding: 16px;
     }
     
     .calc-result-value {
-        font-size: 16px;
+        font-size: 18px;
     }
     
     .calc-time-value {
-        font-size: 16px;
+        font-size: 18px;
     }
     
     /* Список карт */
     .map-item {
-        padding: 15px;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 10px;
     }
     
     .map-item-name {
-        font-size: 15px;
+        font-size: 16px;
+    }
+    
+    .map-item-delete {
+        padding: 8px 14px;
+        font-size: 13px;
     }
     
     /* Предупреждение о смене дня */
     .day-change-warning {
-        padding: 12px;
+        padding: 14px;
+        border-radius: 12px;
     }
     
     .day-change-icon {
-        font-size: 28px;
+        font-size: 32px;
     }
     
     .day-change-title {
-        font-size: 15px;
+        font-size: 16px;
     }
     
     .day-change-subtitle {
-        font-size: 13px;
+        font-size: 14px;
+    }
+    
+    /* Кнопки выбора цвета и меток */
+    .color-btn,
+    .btn-marker {
+        padding: 14px;
+        font-size: 14px;
+        min-height: 48px;
+        border-radius: 8px;
+    }
+    
+    /* Улучшенный scrollbar для мобильных */
+    .sidebar-content::-webkit-scrollbar,
+    .point-info-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .sidebar-content::-webkit-scrollbar-thumb,
+    .point-info-content::-webkit-scrollbar-thumb {
+        background: #666;
+        border-radius: 2px;
     }
 }
 
 /* Очень маленькие экраны */
 @media (max-width: 480px) {
     .sidebar {
-        width: 90%;
+        width: 95%;
     }
     
     .sidebar-header h1 {
-        font-size: 15px;
+        font-size: 17px;
     }
     
     .mode-btn {
-        padding: 8px 2px;
-        font-size: 10px;
+        padding: 10px 6px;
+        font-size: 11px;
     }
     
     .section {
-        padding: 10px;
+        padding: 12px;
     }
     
     .btn {
-        padding: 10px;
-        font-size: 13px;
+        padding: 12px;
+        font-size: 14px;
     }
     
     .center-map-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-        bottom: 15px;
-        right: 15px;
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        bottom: 90px;
+        right: 12px;
     }
     
     .point-info-card {
-        max-height: 80vh;
+        max-height: 85vh;
     }
     
     .modal-content {
-        padding: 15px;
+        padding: 16px;
+        margin: 12px;
     }
     
     .timer {
-        font-size: 18px;
+        font-size: 20px;
+    }
+    
+    .notification {
+        font-size: 13px;
+        padding: 10px 14px;
     }
 }
 
 /* Ландшафтная ориентация на мобильных */
 @media (max-width: 768px) and (orientation: landscape) {
     .sidebar {
-        width: 300px;
-        max-width: 40%;
+        width: 320px;
+        max-width: 45%;
     }
     
     .point-info-card {
         position: absolute;
         top: 50%;
-        right: 10px;
+        right: 12px;
         bottom: auto;
         left: auto;
         transform: translateY(-50%);
-        width: 280px;
-        max-height: calc(100vh - 20px);
-        border-radius: 12px;
+        width: 320px;
+        max-width: 45%;
+        max-height: calc(100vh - 24px);
+        border-radius: 16px;
+    }
+    
+    .point-info-card::before {
+        display: none;
     }
     
     .sidebar-toggle {
-        top: 10px;
-        left: 10px;
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
+        top: 12px;
+        left: 12px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
     }
     
     .notification {
         top: 70px;
+    }
+    
+    .center-map-btn {
+        bottom: 20px;
+        right: 20px;
     }
 }
 
@@ -1541,5 +1649,36 @@ select:disabled {
     .btn:active {
         opacity: 0.8;
         transform: scale(0.98);
+    }
+}
+
+/* Индикатор долгого нажатия */
+.long-press-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 1100;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.long-press-hint.show {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .long-press-hint {
+        bottom: 160px;
+        font-size: 12px;
+        padding: 10px 16px;
     }
 }

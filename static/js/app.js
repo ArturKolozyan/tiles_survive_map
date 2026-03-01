@@ -642,9 +642,61 @@ function closePointInfo() {
     state.selectedPoint = null;
 }
 
+// Swipe to close point info card on mobile
+let cardTouchStartY = 0;
+let cardTouchCurrentY = 0;
+let isSwipingCard = false;
+
+const pointInfoCard = document.getElementById('pointInfoCard');
+
+pointInfoCard.addEventListener('touchstart', (e) => {
+    // Только если касание в области заголовка
+    if (e.target.closest('.point-info-header') || e.target === pointInfoCard) {
+        cardTouchStartY = e.touches[0].clientY;
+        isSwipingCard = true;
+    }
+}, { passive: true });
+
+pointInfoCard.addEventListener('touchmove', (e) => {
+    if (!isSwipingCard) return;
+    
+    cardTouchCurrentY = e.touches[0].clientY;
+    const diff = cardTouchCurrentY - cardTouchStartY;
+    
+    // Только свайп вниз
+    if (diff > 0) {
+        pointInfoCard.style.transform = `translateY(${diff}px)`;
+        pointInfoCard.style.transition = 'none';
+    }
+}, { passive: true });
+
+pointInfoCard.addEventListener('touchend', () => {
+    if (!isSwipingCard) return;
+    
+    const diff = cardTouchCurrentY - cardTouchStartY;
+    
+    // Если свайп больше 100px - закрыть
+    if (diff > 100) {
+        pointInfoCard.style.transition = 'transform 0.3s ease';
+        pointInfoCard.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            closePointInfo();
+            pointInfoCard.style.transform = '';
+            pointInfoCard.style.transition = '';
+        }, 300);
+    } else {
+        // Вернуть на место
+        pointInfoCard.style.transition = 'transform 0.3s ease';
+        pointInfoCard.style.transform = '';
+    }
+    
+    isSwipingCard = false;
+    cardTouchStartY = 0;
+    cardTouchCurrentY = 0;
+}, { passive: true });
+
 // Close point info when clicking outside on mobile
 document.addEventListener('click', (e) => {
-    const pointInfoCard = document.getElementById('pointInfoCard');
     const isClickInsideCard = pointInfoCard.contains(e.target);
     const isClickOnCanvas = e.target === canvas;
     
@@ -1011,17 +1063,29 @@ canvas.addEventListener('wheel', (e) => {
 // Touch events for mobile
 let touchStartDistance = 0;
 let touchStartZoom = 1;
+let touchStartTime = 0;
+let touchStartPos = { x: 0, y: 0 };
+let longPressTimer = null;
+let touchedPointIndex = null;
+let hasMoved = false;
+
+const LONG_PRESS_DURATION = 500; // 500ms для долгого нажатия
+const MOVE_THRESHOLD = 10; // 10px порог для определения движения
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     
     if (e.touches.length === 1) {
-        // Single touch - same as mousedown
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
         const x = (touch.clientX - rect.left - state.camera.x) / state.camera.zoom;
         const y = (touch.clientY - rect.top - state.camera.y) / state.camera.zoom;
         
+        touchStartTime = Date.now();
+        touchStartPos = { x: touch.clientX, y: touch.clientY };
+        hasMoved = false;
+        
+        // Найти точку под пальцем
         let clickedPoint = null;
         state.points.forEach((point, index) => {
             const size = getPointSize(point);
@@ -1032,7 +1096,119 @@ canvas.addEventListener('touchstart', (e) => {
         });
         
         if (clickedPoint !== null) {
+            touchedPointIndex = clickedPoint;
+            
+            // В режиме разработки - долгое нажатие для перемещения
+            if (state.mode === 'dev') {
+                longPressTimer = setTimeout(() => {
+                    // Долгое нажатие - начать перемещение точки
+                    state.draggingPoint = clickedPoint;
+                    const point = state.points[clickedPoint];
+                    state.dragPointOffset = { x: x - point.x, y: y - point.y };
+                    
+                    // Вибрация для обратной связи (если поддерживается)
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                    
+                    showNotification('Перемещение точки');
+                }, LONG_PRESS_DURATION);
+            }
+        } else {
+            touchedPointIndex = null;
+            state.isDragging = true;
+            state.dragStart = { x: touch.clientX - state.camera.x, y: touch.clientY - state.camera.y };
+        }
+    } else if (e.touches.length === 2) {
+        // Отменить долгое нажатие при втором пальце
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        
+        // Two finger pinch zoom
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        touchStartDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+        touchStartZoom = state.camera.zoom;
+        state.isDragging = false;
+        state.draggingPoint = null;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    
+    // Проверить, было ли движение
+    if (!hasMoved && touchStartPos) {
+        const dx = Math.abs(touch.clientX - touchStartPos.x);
+        const dy = Math.abs(touch.clientY - touchStartPos.y);
+        if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+            hasMoved = true;
+            // Отменить долгое нажатие если началось движение
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        }
+    }
+    
+    if (e.touches.length === 1) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (touch.clientX - rect.left - state.camera.x) / state.camera.zoom;
+        const y = (touch.clientY - rect.top - state.camera.y) / state.camera.zoom;
+        
+        // Перемещение точки в режиме разработки
+        if (state.draggingPoint !== null && state.mode === 'dev') {
+            const point = state.points[state.draggingPoint];
+            point.x = snapToGrid(x - state.dragPointOffset.x);
+            point.y = snapToGrid(y - state.dragPointOffset.y);
+            render();
+        }
+        // Перемещение карты
+        else if (state.isDragging) {
+            state.camera.x = touch.clientX - state.dragStart.x;
+            state.camera.y = touch.clientY - state.dragStart.y;
+            render();
+        }
+    } else if (e.touches.length === 2) {
+        // Pinch zoom
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+        
+        const scale = currentDistance / touchStartDistance;
+        state.camera.zoom = Math.max(0.5, Math.min(2, touchStartZoom * scale));
+        render();
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    
+    // Отменить таймер долгого нажатия
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+    
+    // Если это был короткий тап без движения - обработать как клик
+    if (!hasMoved && touchedPointIndex !== null && state.draggingPoint === null) {
+        const touchDuration = Date.now() - touchStartTime;
+        
+        if (touchDuration < LONG_PRESS_DURATION) {
+            // Короткий тап - открыть карточку или применить действие
+            const clickedPoint = touchedPointIndex;
             state.selectedPoint = clickedPoint;
+            
             if (state.mode === 'dev') {
                 showPointInfo(clickedPoint);
             } else {
@@ -1058,51 +1234,12 @@ canvas.addEventListener('touchstart', (e) => {
                 }
             }
             render();
-        } else {
-            state.isDragging = true;
-            state.dragStart = { x: touch.clientX - state.camera.x, y: touch.clientY - state.camera.y };
         }
-    } else if (e.touches.length === 2) {
-        // Two finger pinch zoom
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        touchStartDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        touchStartZoom = state.camera.zoom;
-        state.isDragging = false;
     }
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
     
-    if (e.touches.length === 1 && state.isDragging) {
-        // Single touch drag
-        const touch = e.touches[0];
-        state.camera.x = touch.clientX - state.dragStart.x;
-        state.camera.y = touch.clientY - state.dragStart.y;
-        render();
-    } else if (e.touches.length === 2) {
-        // Pinch zoom
-        const touch1 = e.touches[0];
-        const touch2 = e.touches[1];
-        const currentDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        
-        const scale = currentDistance / touchStartDistance;
-        state.camera.zoom = Math.max(0.5, Math.min(2, touchStartZoom * scale));
-        render();
-    }
-}, { passive: false });
-
-canvas.addEventListener('touchend', (e) => {
-    e.preventDefault();
     state.isDragging = false;
     state.draggingPoint = null;
+    touchedPointIndex = null;
     
     if (e.touches.length < 2) {
         touchStartDistance = 0;
@@ -1166,6 +1303,16 @@ document.getElementById('devMode').addEventListener('click', () => {
     document.getElementById('devPanel').style.display = 'block';
     document.getElementById('gamePanel').style.display = 'none';
     document.getElementById('statsPanel').style.display = 'none';
+    
+    // Показать подсказку на мобильных устройствах
+    if (window.innerWidth <= 768 && !sessionStorage.getItem('longPressHintShown')) {
+        const hint = document.getElementById('longPressHint');
+        hint.classList.add('show');
+        setTimeout(() => {
+            hint.classList.remove('show');
+        }, 4000);
+        sessionStorage.setItem('longPressHintShown', 'true');
+    }
 });
 
 document.getElementById('gameMode').addEventListener('click', () => {
