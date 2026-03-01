@@ -27,6 +27,38 @@ function logout() {
     window.location.href = '/login/';
 }
 
+// Mobile sidebar management
+function initMobileSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    function openSidebar() {
+        sidebar.classList.add('open');
+        sidebarOverlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeSidebar() {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    
+    sidebarToggle.addEventListener('click', openSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    
+    // Close sidebar when clicking on mode buttons or action buttons
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                setTimeout(closeSidebar, 300);
+            }
+        });
+    });
+}
+
 // State
 const GRID_SIZE = 100; // Grid cell size
 
@@ -506,11 +538,11 @@ function setupCalculator(pointsPerMin) {
     const calcWarning = document.getElementById('calcWarning');
     const calcVictory = document.getElementById('calcVictory');
     
-    // Remove old listener
+    // Remove old listener by cloning
     const newInput = calcInput.cloneNode(true);
     calcInput.parentNode.replaceChild(newInput, calcInput);
     
-    // Add new listener
+    // Add new listener to the new input
     newInput.addEventListener('input', (e) => {
         const targetPoints = parseFloat(e.target.value) || 0;
         const minutes = targetPoints / pointsPerMin;
@@ -543,8 +575,7 @@ function setupCalculator(pointsPerMin) {
                 const victoryCondition = getTowerVictoryCondition(point.size);
                 
                 if (victoryCondition && totalPoints >= victoryCondition.victoryPoints) {
-                    const victorySpan = calcVictory.querySelector('span');
-                    victorySpan.innerHTML = `🎉 Победа! Всего очков: ${totalPoints.toLocaleString('ru-RU')} (нужно ${victoryCondition.victoryPoints.toLocaleString('ru-RU')}+)`;
+                    calcVictory.innerHTML = `<span>🎉 Победа! Всего очков: ${totalPoints.toLocaleString('ru-RU')} (нужно ${victoryCondition.victoryPoints.toLocaleString('ru-RU')}+)</span>`;
                     calcVictory.style.display = 'flex';
                 } else {
                     calcVictory.style.display = 'none';
@@ -572,8 +603,7 @@ function setupCalculator(pointsPerMin) {
                     ? `${hoursUntilMidnight} ч ${minsUntilMidnight} мин` 
                     : `${Math.ceil(minutesUntilMidnight)} мин`;
                 
-                const warningSpan = calcWarning.querySelector('span');
-                warningSpan.innerHTML = `⚠️ До 00:00 UTC осталось ${timeText}<br>Максимум очков сегодня: ${maxPoints.toLocaleString('ru-RU')}`;
+                calcWarning.innerHTML = `<span>⚠️ До 00:00 UTC осталось ${timeText}<br>Максимум очков сегодня: ${maxPoints.toLocaleString('ru-RU')}</span>`;
                 calcWarning.style.display = 'flex';
             } else {
                 calcWarning.style.display = 'none';
@@ -591,11 +621,11 @@ function setupLairCalculator(pointsPerAttack) {
     const calcResult = document.getElementById('calcResult');
     const calcTime = document.getElementById('calcTime');
     
-    // Remove old listener
+    // Remove old listener by cloning
     const newInput = calcInput.cloneNode(true);
     calcInput.parentNode.replaceChild(newInput, calcInput);
     
-    // Add new listener
+    // Add new listener to the new input
     newInput.addEventListener('input', (e) => {
         const targetPoints = parseFloat(e.target.value) || 0;
         const attacks = Math.ceil(targetPoints / pointsPerAttack);
@@ -611,6 +641,20 @@ function closePointInfo() {
     document.getElementById('pointEditPanel').style.display = 'none';
     state.selectedPoint = null;
 }
+
+// Close point info when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    const pointInfoCard = document.getElementById('pointInfoCard');
+    const isClickInsideCard = pointInfoCard.contains(e.target);
+    const isClickOnCanvas = e.target === canvas;
+    
+    if (!isClickInsideCard && !isClickOnCanvas && pointInfoCard.classList.contains('show')) {
+        // Don't close if clicking on buttons or other UI elements
+        if (!e.target.closest('.btn') && !e.target.closest('.sidebar')) {
+            closePointInfo();
+        }
+    }
+});
 
 function getPointSize(point) {
     if (point.type === 'lair') return 50;
@@ -963,6 +1007,107 @@ canvas.addEventListener('wheel', (e) => {
     state.camera.zoom = Math.max(0.5, Math.min(2, state.camera.zoom * delta));
     render();
 });
+
+// Touch events for mobile
+let touchStartDistance = 0;
+let touchStartZoom = 1;
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    
+    if (e.touches.length === 1) {
+        // Single touch - same as mousedown
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = (touch.clientX - rect.left - state.camera.x) / state.camera.zoom;
+        const y = (touch.clientY - rect.top - state.camera.y) / state.camera.zoom;
+        
+        let clickedPoint = null;
+        state.points.forEach((point, index) => {
+            const size = getPointSize(point);
+            const dist = Math.sqrt((x - point.x) ** 2 + (y - point.y) ** 2);
+            if (dist < size / 2) {
+                clickedPoint = index;
+            }
+        });
+        
+        if (clickedPoint !== null) {
+            state.selectedPoint = clickedPoint;
+            if (state.mode === 'dev') {
+                showPointInfo(clickedPoint);
+            } else {
+                // Game mode
+                const point = state.points[clickedPoint];
+                const currentDay = getCurrentDay();
+                const isUnlocked = currentDay >= point.unlockDay;
+                
+                if (state.markerMode && state.selectedMarker !== null) {
+                    point.marker = state.selectedMarker;
+                    saveMap();
+                    render();
+                    const markerText = state.selectedMarker === '' ? 'убрана' : state.selectedMarker;
+                    showNotification(`Метка "${markerText}" установлена на ${point.name}`);
+                } else if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
+                    point.color = selectedColor;
+                    saveMap();
+                    updateStats();
+                    render();
+                    showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
+                } else {
+                    showPointInfo(clickedPoint);
+                }
+            }
+            render();
+        } else {
+            state.isDragging = true;
+            state.dragStart = { x: touch.clientX - state.camera.x, y: touch.clientY - state.camera.y };
+        }
+    } else if (e.touches.length === 2) {
+        // Two finger pinch zoom
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        touchStartDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+        touchStartZoom = state.camera.zoom;
+        state.isDragging = false;
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    
+    if (e.touches.length === 1 && state.isDragging) {
+        // Single touch drag
+        const touch = e.touches[0];
+        state.camera.x = touch.clientX - state.dragStart.x;
+        state.camera.y = touch.clientY - state.dragStart.y;
+        render();
+    } else if (e.touches.length === 2) {
+        // Pinch zoom
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const currentDistance = Math.hypot(
+            touch2.clientX - touch1.clientX,
+            touch2.clientY - touch1.clientY
+        );
+        
+        const scale = currentDistance / touchStartDistance;
+        state.camera.zoom = Math.max(0.5, Math.min(2, touchStartZoom * scale));
+        render();
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    state.isDragging = false;
+    state.draggingPoint = null;
+    
+    if (e.touches.length < 2) {
+        touchStartDistance = 0;
+    }
+}, { passive: false });
 
 // UI Handlers
 
@@ -1734,6 +1879,9 @@ async function initializeApp() {
     
     // Setup logout button
     document.getElementById('logoutBtn').addEventListener('click', logout);
+    
+    // Initialize mobile sidebar
+    initMobileSidebar();
     
     render();
     
