@@ -1111,6 +1111,27 @@ document.getElementById('clearAllMarkersBtn').addEventListener('click', () => {
     }
 });
 
+// Center map button handler
+document.getElementById('centerMapBtn').addEventListener('click', () => {
+    // Find START-01 point
+    const startPoint = state.points.find(p => p.name === 'START-01');
+    
+    if (startPoint) {
+        // Center on START-01
+        state.camera.x = canvas.width / 2 - startPoint.x * state.camera.zoom;
+        state.camera.y = canvas.height / 2 - startPoint.y * state.camera.zoom;
+        showNotification('Камера центрирована на START-01');
+    } else {
+        // Center on canvas center (0, 0)
+        state.camera.x = canvas.width / 2;
+        state.camera.y = canvas.height / 2;
+        state.camera.zoom = 1;
+        showNotification('Камера возвращена в центр');
+    }
+    
+    render();
+});
+
 // Map management
 document.getElementById('newMapBtn').addEventListener('click', () => {
     if (confirm('Создать новую карту? Несохраненные изменения будут потеряны.')) {
@@ -1134,6 +1155,8 @@ document.getElementById('newMapBtn').addEventListener('click', () => {
             tower: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
             lair: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
         };
+        // Clear last active map
+        localStorage.removeItem('lastActiveMapId');
         render();
         showNotification('Новая карта создана');
     }
@@ -1251,6 +1274,8 @@ async function saveMap(showNotif = false) {
             if (response.ok && showNotif) {
                 showNotification('Карта сохранена');
             }
+            // Save as last active map
+            localStorage.setItem('lastActiveMapId', state.currentMapId);
         } else {
             const response = await fetch('/api/maps/create/', {
                 method: 'POST',
@@ -1260,6 +1285,8 @@ async function saveMap(showNotif = false) {
             if (response.ok) {
                 const result = await response.json();
                 state.currentMapId = result.id;
+                // Save as last active map
+                localStorage.setItem('lastActiveMapId', result.id);
                 if (showNotif) {
                     showNotification('Карта создана');
                 }
@@ -1384,6 +1411,9 @@ async function loadMapById(id) {
             startTimer();
         }
         
+        // Save as last active map
+        localStorage.setItem('lastActiveMapId', id);
+        
         document.getElementById('loadModal').classList.remove('show');
         showNotification('Карта загружена');
     } catch (error) {
@@ -1397,6 +1427,13 @@ async function deleteMapById(id, event) {
     if (confirm('Удалить карту?')) {
         try {
             await fetch(`/api/maps/${id}/delete/`, { method: 'DELETE' });
+            
+            // If deleted map was the active one, clear it from localStorage
+            const lastActiveMapId = localStorage.getItem('lastActiveMapId');
+            if (lastActiveMapId && parseInt(lastActiveMapId) === id) {
+                localStorage.removeItem('lastActiveMapId');
+            }
+            
             await loadMapList();
             showNotification('Карта удалена');
         } catch (error) {
@@ -1629,4 +1666,20 @@ window.addDailyOil = function() {
 }
 
 // Initialize
-render();
+async function initializeApp() {
+    render();
+    
+    // Try to load last active map from localStorage
+    const lastActiveMapId = localStorage.getItem('lastActiveMapId');
+    if (lastActiveMapId) {
+        try {
+            await loadMapById(parseInt(lastActiveMapId));
+            console.log('Loaded last active map:', lastActiveMapId);
+        } catch (error) {
+            console.log('Could not load last active map:', error);
+            // If loading fails, just continue with empty map
+        }
+    }
+}
+
+initializeApp();
