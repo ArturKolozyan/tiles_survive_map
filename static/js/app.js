@@ -1090,6 +1090,27 @@ document.getElementById('cancelMarkerBtn').addEventListener('click', () => {
     showNotification('Режим меток отменен');
 });
 
+// Clear all markers button handler
+document.getElementById('clearAllMarkersBtn').addEventListener('click', () => {
+    if (confirm('Сбросить все метки со всех точек? Это действие нельзя отменить.')) {
+        let clearedCount = 0;
+        state.points.forEach(point => {
+            if (point.marker) {
+                point.marker = '';
+                clearedCount++;
+            }
+        });
+        
+        if (clearedCount > 0) {
+            saveMap();
+            render();
+            showNotification(`Сброшено меток: ${clearedCount}`);
+        } else {
+            showNotification('Нет меток для сброса');
+        }
+    }
+});
+
 // Map management
 document.getElementById('newMapBtn').addEventListener('click', () => {
     if (confirm('Создать новую карту? Несохраненные изменения будут потеряны.')) {
@@ -1495,7 +1516,7 @@ function updateDayChangeWarning() {
                 <div class="day-change-icon">⚠️</div>
                 <div class="day-change-text">
                     <div class="day-change-title">Новый день ${currentDay + 1}!</div>
-                    <div class="day-change-subtitle">Не забудьте добавить дневную нефть: ${dailyOilGreen}</div>
+                    <div class="day-change-subtitle">Не забудьте обновить общую нефть: ${dailyOilGreen}</div>
                 </div>
             </div>
         `;

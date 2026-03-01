@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiles Survive - Battle Map</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=31">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=37">
 </head>
 <body>
     <div class="container">
@@ -84,23 +84,24 @@
                         <h3>Выбор цвета</h3>
                         <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Выберите цвет, затем кликните по точке</p>
                         <div class="color-buttons">
-                            <button class="color-btn" data-color="white" style="background: #ddd; color: #000;">⚪ Белый</button>
-                            <button class="color-btn" data-color="green" style="background: #4CAF50; color: white;">🟢 Зеленый</button>
-                            <button class="color-btn" data-color="red" style="background: #f44336; color: white;">🔴 Красный</button>
+                            <button class="color-btn" data-color="white">⚪ Белый</button>
+                            <button class="color-btn" data-color="green">🟢 Зеленый</button>
+                            <button class="color-btn" data-color="red">🔴 Красный</button>
                         </div>
-                        <button id="cancelColorBtn" class="btn btn-tool" style="margin-top: 8px; display: none;">❌ Отменить выбор</button>
+                        <button id="cancelColorBtn" class="btn btn-secondary" style="margin-top: 8px; display: none;">❌ Отменить выбор</button>
                     </div>
 
                     <div class="section">
                         <h3>Метки</h3>
-                        <button class="btn btn-marker marker-no-attack" data-marker="Не атаковать">🚫 Не атаковать</button>
-                        <button class="btn btn-marker marker-attack" data-marker="Атаковать">⚔️ Атаковать</button>
-                        <button class="btn btn-marker marker-watch" data-marker="Наблюдаем">👁️ Наблюдаем</button>
-                        <button class="btn btn-marker marker-capture" data-marker="Захват остатками">🎯 Захват остатками</button>
-                        <button class="btn btn-marker marker-whale" data-marker="Охота на кита">🐋 Охота на кита</button>
-                        <button class="btn btn-marker marker-points" data-marker="Набиться для очков">📊 Набиться для очков</button>
-                        <button class="btn btn-marker marker-remove" data-marker="">🗑️ Убрать метку</button>
+                        <button class="btn btn-marker" data-marker="Не атаковать">🚫 Не атаковать</button>
+                        <button class="btn btn-marker" data-marker="Атаковать">⚔️ Атаковать</button>
+                        <button class="btn btn-marker" data-marker="Наблюдаем">👁️ Наблюдаем</button>
+                        <button class="btn btn-marker" data-marker="Захват остатками">🎯 Захват остатками</button>
+                        <button class="btn btn-marker" data-marker="Охота на кита">🐋 Охота на кита</button>
+                        <button class="btn btn-marker" data-marker="Набиться для очков">📊 Набиться для очков</button>
+                        <button class="btn btn-marker" data-marker="">🗑️ Убрать метку</button>
                         <button id="cancelMarkerBtn" class="btn btn-danger" style="display:none; margin-top: 8px;">❌ Отмена</button>
+                        <button id="clearAllMarkersBtn" class="btn btn-secondary" style="margin-top: 8px;">🗑️ Сбросить все метки</button>
                     </div>
                 </div>
 
@@ -130,7 +131,7 @@
                             <span>Нефть/день (красные):</span>
                             <span id="dailyOilRed">0</span>
                         </div>
-                        <button class="btn btn-success" style="margin-top: 15px;" onclick="addDailyOil()">➕ Добавить дневную нефть</button>
+                        <button class="btn btn-success" style="margin-top: 15px;" onclick="addDailyOil()">🔄 Обновить общую нефть</button>
                     </div>
                 </div>
             </div>
@@ -226,6 +227,6 @@
         </div>
     </div>
 
-    <script src="{% static 'js/app.js' %}?v=31"></script>
+    <script src="{% static 'js/app.js' %}?v=37"></script>
 </body>
 </html>
