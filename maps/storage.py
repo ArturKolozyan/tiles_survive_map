@@ -11,13 +11,16 @@ class MapStorage:
     """JSON storage for battle maps"""
     
     @staticmethod
-    def get_all_maps():
-        """Get list of all maps"""
+    def get_all_maps(user_id=None):
+        """Get list of all maps for a user"""
         maps = []
         for file in STORAGE_DIR.glob('map_*.json'):
             try:
                 with open(file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                    # Filter by user_id if provided
+                    if user_id is not None and data.get('user_id') != user_id:
+                        continue
                     maps.append({
                         'id': data['id'],
                         'name': data['name'],
@@ -42,13 +45,14 @@ class MapStorage:
             return json.load(f)
     
     @staticmethod
-    def create_map(name, data):
+    def create_map(name, data, user_id):
         """Create new map"""
         map_id = int(datetime.now().timestamp() * 1000)
         
         map_data = {
             'id': map_id,
             'name': name,
+            'user_id': user_id,
             'data': data,
             'duration_days': 10,
             'start_time': None,

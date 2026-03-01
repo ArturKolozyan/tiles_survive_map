@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiles Survive - Battle Map</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=40">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=43">
 </head>
 <body>
     <div class="container">
@@ -13,6 +13,10 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h1>⚔️ Battle Map</h1>
+                <div class="user-info">
+                    <span id="usernameDisplay"></span>
+                    <button id="logoutBtn" class="btn-logout">Выход</button>
+                </div>
                 <div class="mode-switch">
                     <button id="devMode" class="mode-btn active">🛠️ Разработка</button>
                     <button id="gameMode" class="mode-btn">🎮 Игра</button>
@@ -230,6 +234,6 @@
         </div>
     </div>
 
-    <script src="{% static 'js/app.js' %}?v=40"></script>
+    <script src="{% static 'js/app.js' %}?v=43"></script>
 </body>
 </html>

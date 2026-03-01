@@ -1,0 +1,54 @@
+{
+  "id": 1772377936539,
+  "name": "asdasad",
+  "user_id": 1772377918662,
+  "data": {
+    "points": [
+      {
+        "x": 200,
+        "y": -100,
+        "name": "M-01",
+        "type": "tower",
+        "size": "M",
+        "oil": 320,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": "",
+        "currentPoints": 0
+      },
+      {
+        "x": 200,
+        "y": -100,
+        "name": "S-01",
+        "type": "tower",
+        "size": "S",
+        "oil": 240,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": "",
+        "currentPoints": 0
+      },
+      {
+        "x": 100,
+        "y": -100,
+        "name": "START-01",
+        "type": "alliance_start",
+        "size": "M",
+        "oil": 0,
+        "unlockDay": 0,
+        "color": "white",
+        "marker": "",
+        "currentPoints": 0
+      }
+    ],
+    "connections": []
+  },
+  "duration_days": 10,
+  "start_time": null,
+  "is_running": false,
+  "my_alliance_start_id": null,
+  "total_oil": 0,
+  "last_oil_update": null,
+  "created_at": "2026-03-01T18:12:16.539491",
+  "updated_at": "2026-03-01T18:12:16.539494"
+}

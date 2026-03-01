@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: #1a1a1a;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            color: #f44336;
+        }
+        .success {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Authentication System Test</h1>
+
+    <div class="test-section">
+        <h2>1. Register New User</h2>
+        <input type="text" id="regUsername" placeholder="Username" value="testuser">
+        <input type="password" id="regPassword" placeholder="Password" value="test1234">
+        <button onclick="testRegister()">Register</button>
+        <div id="regResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Login</h2>
+        <input type="text" id="loginUsername" placeholder="Username" value="Sk1llzy">
+        <input type="password" id="loginPassword" placeholder="Password" value="123">
+        <button onclick="testLogin()">Login</button>
+        <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Get Maps (Requires Auth)</h2>
+        <button onclick="testGetMaps()">Get Maps</button>
+        <div id="mapsResult" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Session Info</h2>
+        <button onclick="showSession()">Show Session</button>
+        <button onclick="clearSession()">Clear Session</button>
+        <div id="sessionResult" class="result"></div>
+    </div>
+
+    <script>
+        async function testRegister() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const result = document.getElementById('regResult');
+
+            try {
+                const response = await fetch('/api/auth/register/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = 'SUCCESS:\n' + JSON.stringify(data, null, 2);
+                    
+                    // Save to session
+                    sessionStorage.setItem('authToken', data.token);
+                    sessionStorage.setItem('username', data.username);
+                    sessionStorage.setItem('userId', data.user_id);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = 'ERROR:\n' + JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'ERROR:\n' + error.message;
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const result = document.getElementById('loginResult');
+
+            try {
+                const response = await fetch('/api/auth/login/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = 'SUCCESS:\n' + JSON.stringify(data, null, 2);
+                    
+                    // Save to session
+                    sessionStorage.setItem('authToken', data.token);
+                    sessionStorage.setItem('username', data.username);
+                    sessionStorage.setItem('userId', data.user_id);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = 'ERROR:\n' + JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'ERROR:\n' + error.message;
+            }
+        }
+
+        async function testGetMaps() {
+            const result = document.getElementById('mapsResult');
+            const token = sessionStorage.getItem('authToken');
+
+            if (!token) {
+                result.className = 'result error';
+                result.textContent = 'ERROR: No auth token. Please login first.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/maps/', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    result.textContent = 'SUCCESS:\n' + JSON.stringify(data, null, 2);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = 'ERROR:\n' + JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.className = 'result error';
+                result.textContent = 'ERROR:\n' + error.message;
+            }
+        }
+
+        function showSession() {
+            const result = document.getElementById('sessionResult');
+            const session = {
+                authToken: sessionStorage.getItem('authToken'),
+                username: sessionStorage.getItem('username'),
+                userId: sessionStorage.getItem('userId')
+            };
+            result.className = 'result';
+            result.textContent = JSON.stringify(session, null, 2);
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+            const result = document.getElementById('sessionResult');
+            result.className = 'result success';
+            result.textContent = 'Session cleared!';
+        }
+    </script>
+</body>
+</html>

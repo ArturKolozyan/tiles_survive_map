@@ -1,3 +1,32 @@
+// Authentication
+function getAuthToken() {
+    return sessionStorage.getItem('authToken');
+}
+
+function getAuthHeaders() {
+    const token = getAuthToken();
+    return token ? {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    } : {
+        'Content-Type': 'application/json'
+    };
+}
+
+function checkAuth() {
+    const token = getAuthToken();
+    if (!token) {
+        window.location.href = '/login/';
+        return false;
+    }
+    return true;
+}
+
+function logout() {
+    sessionStorage.clear();
+    window.location.href = '/login/';
+}
+
 // State
 const GRID_SIZE = 100; // Grid cell size
 
@@ -1155,8 +1184,6 @@ document.getElementById('newMapBtn').addEventListener('click', () => {
             tower: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 },
             lair: { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
         };
-        // Clear last active map
-        localStorage.removeItem('lastActiveMapId');
         render();
         showNotification('Новая карта создана');
     }
@@ -1268,25 +1295,24 @@ async function saveMap(showNotif = false) {
         if (state.currentMapId) {
             const response = await fetch(`/api/maps/${state.currentMapId}/update/`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(data)
             });
             if (response.ok && showNotif) {
                 showNotification('Карта сохранена');
             }
-            // Save as last active map
-            localStorage.setItem('lastActiveMapId', state.currentMapId);
+            // Set as active map on server
+            await setActiveMap(state.currentMapId);
         } else {
             const response = await fetch('/api/maps/create/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(data)
             });
             if (response.ok) {
                 const result = await response.json();
                 state.currentMapId = result.id;
-                // Save as last active map
-                localStorage.setItem('lastActiveMapId', result.id);
+                // Active map is set automatically on server when creating
                 if (showNotif) {
                     showNotification('Карта создана');
                 }
@@ -1299,9 +1325,38 @@ async function saveMap(showNotif = false) {
     }
 }
 
+async function setActiveMap(mapId) {
+    try {
+        await fetch('/api/auth/active-map/set/', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ map_id: mapId })
+        });
+    } catch (error) {
+        console.error('Failed to set active map:', error);
+    }
+}
+
+async function getActiveMap() {
+    try {
+        const response = await fetch('/api/auth/active-map/', {
+            headers: getAuthHeaders()
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data.active_map_id;
+        }
+    } catch (error) {
+        console.error('Failed to get active map:', error);
+    }
+    return null;
+}
+
 async function loadMapList() {
     try {
-        const response = await fetch('/api/maps/');
+        const response = await fetch('/api/maps/', {
+            headers: getAuthHeaders()
+        });
         const maps = await response.json();
         
         const listEl = document.getElementById('mapList');
@@ -1330,7 +1385,9 @@ async function loadMapById(id) {
     try {
         stopTimer();
         
-        const response = await fetch(`/api/maps/${id}/`);
+        const response = await fetch(`/api/maps/${id}/`, {
+            headers: getAuthHeaders()
+        });
         const map = await response.json();
         
         state.currentMapId = map.id;
@@ -1411,8 +1468,8 @@ async function loadMapById(id) {
             startTimer();
         }
         
-        // Save as last active map
-        localStorage.setItem('lastActiveMapId', id);
+        // Set as active map on server
+        await setActiveMap(id);
         
         document.getElementById('loadModal').classList.remove('show');
         showNotification('Карта загружена');
@@ -1426,13 +1483,10 @@ async function deleteMapById(id, event) {
     event.stopPropagation();
     if (confirm('Удалить карту?')) {
         try {
-            await fetch(`/api/maps/${id}/delete/`, { method: 'DELETE' });
-            
-            // If deleted map was the active one, clear it from localStorage
-            const lastActiveMapId = localStorage.getItem('lastActiveMapId');
-            if (lastActiveMapId && parseInt(lastActiveMapId) === id) {
-                localStorage.removeItem('lastActiveMapId');
-            }
+            await fetch(`/api/maps/${id}/delete/`, { 
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
             
             await loadMapList();
             showNotification('Карта удалена');
@@ -1667,16 +1721,30 @@ window.addDailyOil = function() {
 
 // Initialize
 async function initializeApp() {
+    // Check authentication
+    if (!checkAuth()) {
+        return;
+    }
+    
+    // Display username
+    const username = sessionStorage.getItem('username');
+    if (username) {
+        document.getElementById('usernameDisplay').textContent = username;
+    }
+    
+    // Setup logout button
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    
     render();
     
-    // Try to load last active map from localStorage
-    const lastActiveMapId = localStorage.getItem('lastActiveMapId');
-    if (lastActiveMapId) {
+    // Try to load active map from server
+    const activeMapId = await getActiveMap();
+    if (activeMapId) {
         try {
-            await loadMapById(parseInt(lastActiveMapId));
-            console.log('Loaded last active map:', lastActiveMapId);
+            await loadMapById(activeMapId);
+            console.log('Loaded active map:', activeMapId);
         } catch (error) {
-            console.log('Could not load last active map:', error);
+            console.log('Could not load active map:', error);
             // If loading fails, just continue with empty map
         }
     }
