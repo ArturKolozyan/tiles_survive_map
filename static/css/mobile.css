@@ -1,0 +1,574 @@
+/* ========================================
+   СТИЛИ ДЛЯ МОБИЛЬНЫХ (max-width: 768px)
+   ======================================== */
+
+/* Show mobile elements */
+.mobile-only {
+    display: block !important;
+}
+
+.desktop-only {
+    display: none !important;
+}
+
+/* Body */
+body {
+    overflow: hidden;
+}
+
+.container {
+    flex-direction: row;
+    height: 100vh;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 2001;
+    width: 50px;
+    height: 50px;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s;
+}
+
+.sidebar-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Sidebar - выдвижной */
+.sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    width: 90%;
+    max-width: 360px;
+    height: 100vh;
+    z-index: 2000;
+    transition: left 0.3s ease;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 4px 0 12px rgba(0,0,0,0.5);
+    background: var(--bg-medium);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+/* Overlay */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 1999;
+    backdrop-filter: blur(2px);
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-light);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header h1 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.user-info {
+    padding: 10px;
+    margin-bottom: 12px;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-dark);
+    border-radius: var(--radius-md);
+}
+
+.user-info span {
+    font-size: 14px;
+    text-align: center;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.btn-logout {
+    padding: 8px 16px;
+    font-size: 13px;
+    width: 100%;
+    background: #666;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+}
+
+.mode-switch {
+    gap: 8px;
+}
+
+.mode-btn {
+    padding: 12px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-input);
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.mode-btn.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.sidebar-content {
+    padding: 12px;
+    padding-bottom: 80px;
+    overflow-y: auto;
+}
+
+.section {
+    padding: 14px;
+    margin-bottom: 16px;
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+}
+
+.section h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+    padding: 14px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    min-height: 48px;
+    font-weight: 600;
+}
+
+.btn-add {
+    font-size: 14px;
+    padding: 12px;
+    min-height: 44px;
+}
+
+.color-btn,
+.btn-marker {
+    padding: 14px;
+    font-size: 14px;
+    min-height: 48px;
+    border-radius: var(--radius-lg);
+}
+
+/* Map Area */
+.map-area {
+    width: 100%;
+    height: 100vh;
+}
+
+#mapCanvas {
+    touch-action: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* Center Map Button */
+.center-map-btn {
+    bottom: 100px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Notification */
+.notification {
+    max-width: calc(100% - 32px);
+    font-size: 14px;
+    padding: 12px 16px;
+    top: 80px;
+    left: 16px;
+    right: 16px;
+    transform: translateX(0) translateY(-10px);
+}
+
+.notification.show {
+    transform: translateX(0) translateY(0);
+}
+
+/* Point Info Card - Mobile */
+.point-info-card {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-height: 80vh;
+    border-radius: 20px 20px 0 0;
+    z-index: 1500;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+}
+
+/* Swipe indicator */
+.point-info-card::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #666;
+    border-radius: 2px;
+}
+
+.point-info-header {
+    padding: 20px 16px 16px;
+    position: sticky;
+    top: 0;
+    background: var(--bg-medium);
+    z-index: 10;
+}
+
+.point-info-header h3 {
+    font-size: 18px;
+}
+
+.close-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+}
+
+.point-info-content {
+    padding: 16px;
+    max-height: calc(80vh - 80px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sections in card */
+.current-points-section,
+.locked-info-section,
+.info-resources,
+.total-section,
+.victory-progress-section,
+.calculator-section {
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.current-points-display {
+    font-size: 24px;
+    padding: 16px;
+}
+
+/* Stats */
+.timer {
+    font-size: 22px;
+    padding: 16px;
+}
+
+.stat-row {
+    font-size: 15px;
+    padding: 14px 0;
+}
+
+.day-change-warning {
+    padding: 14px;
+    border-radius: var(--radius-xl);
+}
+
+.day-change-icon {
+    font-size: 32px;
+}
+
+.day-change-title {
+    font-size: 16px;
+}
+
+.day-change-subtitle {
+    font-size: 14px;
+}
+
+/* Calculator */
+.calc-input {
+    width: 140px;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.calc-result {
+    padding: 16px;
+}
+
+.calc-result-value {
+    font-size: 18px;
+}
+
+.calc-time-value {
+    font-size: 18px;
+}
+
+/* Modal */
+.modal-content {
+    min-width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+    padding: 20px;
+    margin: 16px;
+    max-height: calc(100vh - 32px);
+    border-radius: 16px;
+}
+
+.modal-content h3 {
+    font-size: 18px;
+    margin-bottom: 16px;
+}
+
+/* Map List */
+.map-item {
+    padding: 16px;
+    border-radius: var(--radius-xl);
+    margin-bottom: 10px;
+}
+
+.map-item-name {
+    font-size: 16px;
+}
+
+.map-item-delete {
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    padding: 14px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: var(--radius-lg);
+}
+
+label {
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+/* Scrollbar for mobile */
+.sidebar-content::-webkit-scrollbar,
+.point-info-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb,
+.point-info-content::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 2px;
+}
+
+/* Long Press Hint */
+.long-press-hint {
+    display: block;
+    position: fixed;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 24px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 1100;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.long-press-hint.show {
+    opacity: 1;
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .sidebar {
+        width: 95%;
+    }
+    
+    .sidebar-header h1 {
+        font-size: 17px;
+    }
+    
+    .mode-btn {
+        padding: 10px 6px;
+        font-size: 11px;
+    }
+    
+    .section {
+        padding: 12px;
+    }
+    
+    .btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    .center-map-btn {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        bottom: 90px;
+        right: 12px;
+    }
+    
+    .point-info-card {
+        max-height: 85vh;
+    }
+    
+    .modal-content {
+        padding: 16px;
+        margin: 12px;
+    }
+    
+    .timer {
+        font-size: 20px;
+    }
+    
+    .notification {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+}
+
+/* Landscape orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sidebar {
+        width: 320px;
+        max-width: 45%;
+    }
+    
+    .point-info-card {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        bottom: auto;
+        left: auto;
+        transform: translateY(-50%);
+        width: 320px;
+        max-width: 45%;
+        max-height: calc(100vh - 24px);
+        border-radius: 16px;
+    }
+    
+    .point-info-card::before {
+        display: none;
+    }
+    
+    .sidebar-toggle {
+        top: 12px;
+        left: 12px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+    
+    .notification {
+        top: 70px;
+    }
+    
+    .center-map-btn {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .long-press-hint {
+        bottom: 80px;
+    }
+}
+
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .mode-btn,
+    .color-btn,
+    .btn-marker {
+        min-height: 48px;
+    }
+    
+    .close-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 28px;
+    }
+    
+    .center-map-btn {
+        width: 56px;
+        height: 56px;
+    }
+    
+    /* Remove hover effects */
+    .btn:hover,
+    .mode-btn:hover,
+    .color-btn:hover,
+    .btn-marker:hover,
+    .map-item:hover,
+    .close-btn:hover,
+    .btn-reset-point:hover,
+    .map-item-delete:hover {
+        background: inherit;
+        transform: none;
+    }
+    
+    /* Add active states */
+    .btn:active {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+    
+    /* Smooth scrolling */
+    .sidebar-content,
+    .point-info-content,
+    .map-list {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+}
