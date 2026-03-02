@@ -384,3 +384,10 @@ select:disabled {
 .mobile-only {
     display: none;
 }
+
+/* Hide mobile-specific elements by default */
+.sidebar-toggle,
+.sidebar-overlay,
+.long-press-hint {
+    display: none;
+}

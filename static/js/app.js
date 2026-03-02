@@ -142,7 +142,6 @@ function addPoint(type, size = 'M', oil = 0) {
         currentPoints: 0
     };
     state.points.push(point);
-    updateAllianceSelect();
     render();
 }
 
@@ -155,24 +154,7 @@ function deletePoint(index) {
     state.points.splice(index, 1);
     state.selectedPoint = null;
     document.getElementById('pointEditPanel').style.display = 'none';
-    updateAllianceSelect();
     render();
-}
-
-function updateAllianceSelect() {
-    const select = document.getElementById('myAllianceSelect');
-    select.innerHTML = '<option value="">Не выбрана</option>';
-    state.points.forEach((point, index) => {
-        if (point.type === 'alliance_start') {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = point.name;
-            if (state.mapSettings.myAllianceStartId === index) {
-                option.selected = true;
-            }
-            select.appendChild(option);
-        }
-    });
 }
 
 // Rendering
@@ -715,30 +697,15 @@ function getPointSize(point) {
 }
 
 function getPointColor(point, index) {
-    // Alliance start points
-    if (point.type === 'alliance_start') {
-        if (!state.mapSettings.isRunning) {
-            return '#666'; // Gray in dev mode
-        }
-        // In game mode
-        if (state.mapSettings.myAllianceStartId === index) {
-            return '#FFD700'; // Yellow - our start
-        } else {
-            return '#666'; // Gray - enemy start
+    // Check if point is unlocked (only when map is running)
+    if (state.mapSettings.isRunning) {
+        const currentDay = getCurrentDay();
+        if (point.unlockDay > currentDay) {
+            return '#444'; // Dark gray - locked
         }
     }
     
-    if (!state.mapSettings.isRunning) {
-        return '#ddd'; // White in dev mode
-    }
-    
-    // Check if point is unlocked
-    const currentDay = getCurrentDay();
-    if (point.unlockDay > currentDay) {
-        return '#444'; // Dark gray - locked
-    }
-    
-    // Use color
+    // Use color for all points (including alliance_start)
     switch (point.color) {
         case 'white': return '#ddd';    // White - free
         case 'green': return '#4CAF50'; // Green - captured
@@ -748,30 +715,20 @@ function getPointColor(point, index) {
 }
 
 function getConnectionColor(from, to) {
-    if (!state.mapSettings.isRunning) {
-        return '#ddd'; // White in dev mode
+    // Check if either point is locked (only when map is running)
+    if (state.mapSettings.isRunning) {
+        const currentDay = getCurrentDay();
+        const fromLocked = from.unlockDay > currentDay;
+        const toLocked = to.unlockDay > currentDay;
+        
+        if (fromLocked || toLocked) {
+            return '#444'; // Dark gray if any point is locked
+        }
     }
     
-    // Check if either point is locked
-    const currentDay = getCurrentDay();
-    const fromLocked = from.unlockDay > currentDay;
-    const toLocked = to.unlockDay > currentDay;
-    
-    if (fromLocked || toLocked) {
-        return '#444'; // Dark gray if any point is locked
-    }
-    
-    // Get colors, treating our alliance start as green
-    let fromColor = from.color;
-    let toColor = to.color;
-    
-    // Treat our alliance start point as green for connection purposes
-    if (from.type === 'alliance_start' && state.points.indexOf(from) === state.mapSettings.myAllianceStartId) {
-        fromColor = 'green';
-    }
-    if (to.type === 'alliance_start' && state.points.indexOf(to) === state.mapSettings.myAllianceStartId) {
-        toColor = 'green';
-    }
+    // Get colors
+    const fromColor = from.color;
+    const toColor = to.color;
     
     // If both same color, use that color
     if (fromColor === toColor) {
@@ -991,10 +948,19 @@ canvas.addEventListener('mousedown', (e) => {
         } else {
             state.selectedPoint = clickedPoint;
             if (state.mode === 'dev') {
-                showPointInfo(clickedPoint);
-                state.draggingPoint = clickedPoint;
-                const point = state.points[clickedPoint];
-                state.dragPointOffset = { x: x - point.x, y: y - point.y };
+                // If color is selected in dev mode
+                if (selectedColor) {
+                    const point = state.points[clickedPoint];
+                    point.color = selectedColor;
+                    saveMap();
+                    render();
+                    showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
+                } else {
+                    showPointInfo(clickedPoint);
+                    state.draggingPoint = clickedPoint;
+                    const point = state.points[clickedPoint];
+                    state.dragPointOffset = { x: x - point.x, y: y - point.y };
+                }
             } else {
                 // Game mode
                 const point = state.points[clickedPoint];
@@ -1009,8 +975,8 @@ canvas.addEventListener('mousedown', (e) => {
                     const markerText = state.selectedMarker === '' ? 'убрана' : state.selectedMarker;
                     showNotification(`Метка "${markerText}" установлена на ${point.name}`);
                 }
-                // If color is selected and point can be changed
-                else if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
+                // If color is selected and point is unlocked
+                else if (selectedColor && isUnlocked) {
                     point.color = selectedColor;
                     saveMap();
                     updateStats();
@@ -1210,7 +1176,16 @@ canvas.addEventListener('touchend', (e) => {
             state.selectedPoint = clickedPoint;
             
             if (state.mode === 'dev') {
-                showPointInfo(clickedPoint);
+                // If color is selected in dev mode
+                if (selectedColor) {
+                    const point = state.points[clickedPoint];
+                    point.color = selectedColor;
+                    saveMap();
+                    render();
+                    showNotification(`Точка ${point.name} → ${selectedColor === 'white' ? 'Белая' : selectedColor === 'green' ? 'Зеленая' : 'Красная'}`);
+                } else {
+                    showPointInfo(clickedPoint);
+                }
             } else {
                 // Game mode
                 const point = state.points[clickedPoint];
@@ -1223,7 +1198,7 @@ canvas.addEventListener('touchend', (e) => {
                     render();
                     const markerText = state.selectedMarker === '' ? 'убрана' : state.selectedMarker;
                     showNotification(`Метка "${markerText}" установлена на ${point.name}`);
-                } else if (selectedColor && isUnlocked && point.type !== 'alliance_start') {
+                } else if (selectedColor && isUnlocked) {
                     point.color = selectedColor;
                     saveMap();
                     updateStats();
@@ -1284,11 +1259,6 @@ document.getElementById('cancelBtn').addEventListener('click', () => {
     render();
 });
 
-
-document.getElementById('myAllianceSelect').addEventListener('change', (e) => {
-    state.mapSettings.myAllianceStartId = e.target.value ? parseInt(e.target.value) : null;
-    render();
-});
 
 document.getElementById('durationInput').addEventListener('change', (e) => {
     state.mapSettings.durationDays = parseInt(e.target.value) || 10;
@@ -1357,8 +1327,14 @@ document.querySelectorAll('.color-btn').forEach(btn => {
         btn.classList.add('selected');
         selectedColor = btn.dataset.color;
         
-        // Show cancel button
-        document.getElementById('cancelColorBtn').style.display = 'block';
+        // Show appropriate cancel button based on mode
+        if (state.mode === 'dev') {
+            document.getElementById('cancelColorBtnDev').style.display = 'block';
+            document.getElementById('cancelColorBtn').style.display = 'none';
+        } else {
+            document.getElementById('cancelColorBtn').style.display = 'block';
+            document.getElementById('cancelColorBtnDev').style.display = 'none';
+        }
         
         showNotification(`Выбран цвет: ${btn.textContent.trim()}`);
     });
@@ -1371,6 +1347,18 @@ document.getElementById('cancelColorBtn').addEventListener('click', () => {
     
     // Hide cancel button
     document.getElementById('cancelColorBtn').style.display = 'none';
+    
+    showNotification('Режим выбора цвета отменен');
+});
+
+// Cancel color button in dev mode
+document.getElementById('cancelColorBtnDev').addEventListener('click', () => {
+    // Remove selection from all buttons
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+    selectedColor = null;
+    
+    // Hide cancel button
+    document.getElementById('cancelColorBtnDev').style.display = 'none';
     
     showNotification('Режим выбора цвета отменен');
 });
@@ -1520,15 +1508,10 @@ document.getElementById('startMapBtn').addEventListener('click', async () => {
         return;
     }
     
-    if (state.mapSettings.myAllianceStartId === null) {
-        showNotification('Выберите свою точку начала', true);
-        return;
-    }
-    
     state.mapSettings.startTime = new Date(dateInput + 'T00:00:00Z').toISOString();
     state.mapSettings.isRunning = true;
     
-    // Initialize all points to white
+    // Initialize all points to white if they don't have a color
     state.points.forEach(point => {
         if (!point.color) {
             point.color = 'white';
@@ -1805,6 +1788,11 @@ function updateStats() {
         const currentDay = getCurrentDay();
         
         state.points.forEach(point => {
+            // Skip alliance start points (they don't give oil)
+            if (point.type === 'alliance_start') {
+                return;
+            }
+            
             // Skip locked points
             if (point.unlockDay > currentDay) {
                 return;
