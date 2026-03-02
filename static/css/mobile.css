@@ -2,7 +2,7 @@
    СТИЛИ ДЛЯ МОБИЛЬНЫХ (max-width: 768px)
    ======================================== */
 
-/* Show mobile elements */
+/* Show/Hide elements */
 .mobile-only {
     display: block !important;
 }
@@ -11,14 +11,18 @@
     display: none !important;
 }
 
-/* Body */
+/* Body and Container */
 body {
     overflow: hidden;
+    touch-action: pan-x pan-y;
 }
 
 .container {
+    display: flex;
     flex-direction: row;
     height: 100vh;
+    width: 100vw;
+    position: relative;
 }
 
 /* Sidebar Toggle Button */
@@ -27,48 +31,27 @@ body {
     align-items: center;
     justify-content: center;
     position: fixed;
-    top: 15px;
-    left: 15px;
+    top: 10px;
+    left: 10px;
     z-index: 2001;
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     background: var(--primary-color);
     border: none;
     border-radius: 50%;
     color: white;
-    font-size: 24px;
+    font-size: 22px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    transition: transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .sidebar-toggle:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
 }
 
-/* Sidebar - выдвижной */
-.sidebar {
-    position: fixed;
-    left: -100%;
-    top: 0;
-    width: 90%;
-    max-width: 360px;
-    height: 100vh;
-    z-index: 2000;
-    transition: left 0.3s ease;
-    border-right: 1px solid var(--border-color);
-    box-shadow: 4px 0 12px rgba(0,0,0,0.5);
-    background: var(--bg-medium);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.sidebar.open {
-    left: 0;
-}
-
-/* Overlay */
+/* Sidebar Overlay */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -76,36 +59,57 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     z-index: 1999;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 
 .sidebar-overlay.show {
     display: block;
 }
 
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    left: -100%;
+    top: 0;
+    width: 85%;
+    max-width: 340px;
+    height: 100vh;
+    z-index: 2000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bg-medium);
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
 /* Sidebar Header */
 .sidebar-header {
-    padding: 16px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    padding: 15px;
     background: var(--bg-light);
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .sidebar-header h1 {
-    font-size: 18px;
+    font-size: 17px;
     margin-bottom: 12px;
     font-weight: 600;
 }
 
 .user-info {
-    padding: 10px;
-    margin-bottom: 12px;
+    display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 10px;
+    margin-bottom: 12px;
     background: var(--bg-dark);
     border-radius: var(--radius-md);
 }
@@ -118,7 +122,7 @@ body {
 }
 
 .btn-logout {
-    padding: 8px 16px;
+    padding: 10px;
     font-size: 13px;
     width: 100%;
     background: #666;
@@ -127,14 +131,17 @@ body {
     cursor: pointer;
     border-radius: var(--radius-sm);
     transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .mode-switch {
-    gap: 8px;
+    display: flex;
+    gap: 6px;
 }
 
 .mode-btn {
-    padding: 12px 8px;
+    flex: 1;
+    padding: 12px 6px;
     font-size: 12px;
     font-weight: 600;
     background: var(--bg-input);
@@ -143,6 +150,8 @@ body {
     cursor: pointer;
     border-radius: var(--radius-md);
     transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
 }
 
 .mode-btn.active {
@@ -150,15 +159,18 @@ body {
     color: white;
 }
 
+/* Sidebar Content */
 .sidebar-content {
+    flex: 1;
     padding: 12px;
-    padding-bottom: 80px;
+    padding-bottom: 20px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .section {
     padding: 14px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     background: var(--bg-light);
     border-radius: var(--radius-lg);
 }
@@ -177,6 +189,7 @@ body {
     margin-bottom: 10px;
     min-height: 48px;
     font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-add {
@@ -191,58 +204,86 @@ body {
     font-size: 14px;
     min-height: 48px;
     border-radius: var(--radius-lg);
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Map Area */
 .map-area {
     width: 100%;
     height: 100vh;
+    position: relative;
 }
 
 #mapCanvas {
     touch-action: none;
     width: 100%;
     height: 100%;
+    display: block;
 }
 
 /* Center Map Button */
 .center-map-btn {
-    bottom: 100px;
-    right: 16px;
-    width: 56px;
-    height: 56px;
+    position: fixed;
+    bottom: 20px;
+    right: 15px;
+    width: 52px;
+    height: 52px;
     font-size: 24px;
+    background: var(--border-light);
+    color: white;
+    border: 2px solid #555;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
     box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    z-index: 100;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.center-map-btn:active {
+    transform: scale(0.9);
 }
 
 /* Notification */
 .notification {
-    max-width: calc(100% - 32px);
+    position: fixed;
+    top: 70px;
+    left: 10px;
+    right: 10px;
+    transform: translateY(-10px);
+    max-width: calc(100% - 20px);
     font-size: 14px;
     padding: 12px 16px;
-    top: 80px;
-    left: 16px;
-    right: 16px;
-    transform: translateX(0) translateY(-10px);
+    border-radius: var(--radius-lg);
 }
 
 .notification.show {
-    transform: translateX(0) translateY(0);
+    transform: translateY(0);
 }
 
-/* Point Info Card - Mobile */
+/* Point Info Card */
 .point-info-card {
     position: fixed;
-    top: auto;
     bottom: 0;
-    right: 0;
     left: 0;
-    transform: none;
+    right: 0;
+    transform: translateY(100%);
     width: 100%;
-    max-height: 80vh;
+    max-height: 75vh;
+    background: var(--bg-medium);
     border-radius: 20px 20px 0 0;
     z-index: 1500;
     box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.point-info-card.show {
+    transform: translateY(0);
 }
 
 /* Swipe indicator */
@@ -259,26 +300,39 @@ body {
 }
 
 .point-info-header {
-    padding: 20px 16px 16px;
-    position: sticky;
-    top: 0;
+    padding: 20px 16px 14px;
     background: var(--bg-medium);
-    z-index: 10;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .point-info-header h3 {
     font-size: 18px;
+    margin: 0;
+    color: var(--primary-color);
 }
 
 .close-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .point-info-content {
+    flex: 1;
     padding: 16px;
-    max-height: calc(80vh - 80px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -348,11 +402,11 @@ body {
 
 /* Modal */
 .modal-content {
-    min-width: calc(100% - 32px);
-    max-width: calc(100% - 32px);
+    min-width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
     padding: 20px;
-    margin: 16px;
-    max-height: calc(100vh - 32px);
+    margin: 12px;
+    max-height: calc(100vh - 24px);
     border-radius: 16px;
 }
 
@@ -375,6 +429,7 @@ body {
 .map-item-delete {
     padding: 8px 14px;
     font-size: 13px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Inputs */
@@ -383,7 +438,7 @@ input[type="number"],
 input[type="date"],
 select {
     padding: 14px;
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
     border-radius: var(--radius-lg);
 }
 
@@ -392,7 +447,7 @@ label {
     margin-top: 12px;
 }
 
-/* Scrollbar for mobile */
+/* Scrollbar */
 .sidebar-content::-webkit-scrollbar,
 .point-info-content::-webkit-scrollbar {
     width: 4px;
@@ -408,7 +463,7 @@ label {
 .long-press-hint {
     display: block;
     position: fixed;
-    bottom: 160px;
+    bottom: 90px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(76, 175, 80, 0.95);
@@ -422,24 +477,50 @@ label {
     transition: opacity 0.3s;
     pointer-events: none;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    max-width: calc(100% - 40px);
+    text-align: center;
 }
 
 .long-press-hint.show {
     opacity: 1;
 }
 
+/* Remove hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover,
+    .mode-btn:hover,
+    .color-btn:hover,
+    .btn-marker:hover,
+    .map-item:hover,
+    .close-btn:hover,
+    .btn-reset-point:hover,
+    .map-item-delete:hover,
+    .center-map-btn:hover {
+        background: inherit;
+        transform: none;
+    }
+    
+    .btn:active,
+    .mode-btn:active,
+    .color-btn:active,
+    .btn-marker:active {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
 /* Very small screens */
 @media (max-width: 480px) {
     .sidebar {
-        width: 95%;
+        width: 90%;
     }
     
     .sidebar-header h1 {
-        font-size: 17px;
+        font-size: 16px;
     }
     
     .mode-btn {
-        padding: 10px 6px;
+        padding: 10px 4px;
         font-size: 11px;
     }
     
@@ -453,20 +534,20 @@ label {
     }
     
     .center-map-btn {
-        width: 52px;
-        height: 52px;
+        width: 48px;
+        height: 48px;
         font-size: 22px;
-        bottom: 90px;
-        right: 12px;
+        bottom: 15px;
+        right: 10px;
     }
     
     .point-info-card {
-        max-height: 85vh;
+        max-height: 80vh;
     }
     
     .modal-content {
         padding: 16px;
-        margin: 12px;
+        margin: 10px;
     }
     
     .timer {
@@ -482,21 +563,25 @@ label {
 /* Landscape orientation */
 @media (max-width: 768px) and (orientation: landscape) {
     .sidebar {
-        width: 320px;
-        max-width: 45%;
+        width: 300px;
+        max-width: 40%;
     }
     
     .point-info-card {
-        position: absolute;
+        position: fixed;
         top: 50%;
-        right: 12px;
+        right: 10px;
         bottom: auto;
         left: auto;
         transform: translateY(-50%);
-        width: 320px;
-        max-width: 45%;
-        max-height: calc(100vh - 24px);
+        width: 300px;
+        max-width: 40%;
+        max-height: calc(100vh - 20px);
         border-radius: 16px;
+    }
+    
+    .point-info-card.show {
+        transform: translateY(-50%);
     }
     
     .point-info-card::before {
@@ -504,71 +589,23 @@ label {
     }
     
     .sidebar-toggle {
-        top: 12px;
-        left: 12px;
-        width: 48px;
-        height: 48px;
-        font-size: 22px;
+        top: 10px;
+        left: 10px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
     }
     
     .notification {
-        top: 70px;
+        top: 60px;
     }
     
     .center-map-btn {
-        bottom: 20px;
-        right: 20px;
+        bottom: 15px;
+        right: 15px;
     }
     
     .long-press-hint {
-        bottom: 80px;
-    }
-}
-
-/* Touch device improvements */
-@media (hover: none) and (pointer: coarse) {
-    .btn,
-    .mode-btn,
-    .color-btn,
-    .btn-marker {
-        min-height: 48px;
-    }
-    
-    .close-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 28px;
-    }
-    
-    .center-map-btn {
-        width: 56px;
-        height: 56px;
-    }
-    
-    /* Remove hover effects */
-    .btn:hover,
-    .mode-btn:hover,
-    .color-btn:hover,
-    .btn-marker:hover,
-    .map-item:hover,
-    .close-btn:hover,
-    .btn-reset-point:hover,
-    .map-item-delete:hover {
-        background: inherit;
-        transform: none;
-    }
-    
-    /* Add active states */
-    .btn:active {
-        opacity: 0.8;
-        transform: scale(0.98);
-    }
-    
-    /* Smooth scrolling */
-    .sidebar-content,
-    .point-info-content,
-    .map-list {
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
+        bottom: 70px;
     }
 }
