@@ -33,10 +33,17 @@ function initMobileSidebar() {
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     
-    function openSidebar() {
-        sidebar.classList.add('open');
-        sidebarOverlay.classList.add('show');
-        document.body.style.overflow = 'hidden';
+    function toggleSidebar() {
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        } else {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
     }
     
     function closeSidebar() {
@@ -45,18 +52,11 @@ function initMobileSidebar() {
         document.body.style.overflow = '';
     }
     
-    sidebarToggle.addEventListener('click', openSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    // Toggle sidebar on button click
+    sidebarToggle.addEventListener('click', toggleSidebar);
     
-    // Close sidebar when clicking on mode buttons or action buttons
-    const modeButtons = document.querySelectorAll('.mode-btn');
-    modeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (window.innerWidth <= 768) {
-                setTimeout(closeSidebar, 300);
-            }
-        });
-    });
+    // Close sidebar when clicking on overlay
+    sidebarOverlay.addEventListener('click', closeSidebar);
 }
 
 // State
