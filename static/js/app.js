@@ -1111,12 +1111,12 @@ canvas.addEventListener('touchmove', (e) => {
     const touch = e.touches[0];
     
     // Проверить, было ли движение
-    if (!hasMoved && touchStartPos) {
+    if (!hasMoved && touchStartPos && state.draggingPoint === null) {
         const dx = Math.abs(touch.clientX - touchStartPos.x);
         const dy = Math.abs(touch.clientY - touchStartPos.y);
         if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
             hasMoved = true;
-            // Отменить долгое нажатие если началось движение
+            // Отменить долгое нажатие если началось движение И точка не перемещается
             if (longPressTimer) {
                 clearTimeout(longPressTimer);
                 longPressTimer = null;
