@@ -1801,7 +1801,6 @@ async function loadMapById(id) {
             document.getElementById('stopMapBtn').style.display = 'none';
         }
         
-        updateAllianceSelect();
         render();
         updateStats();
         
@@ -1815,6 +1814,7 @@ async function loadMapById(id) {
         document.getElementById('loadModal').classList.remove('show');
         showNotification('Карта загружена');
     } catch (error) {
+        console.error('Load map error:', error);
         showNotification('Ошибка загрузки карты', true);
     }
 }
