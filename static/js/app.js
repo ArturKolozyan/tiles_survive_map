@@ -1171,8 +1171,51 @@ canvas.addEventListener('touchend', (e) => {
         const touchDuration = Date.now() - touchStartTime;
         
         if (touchDuration < LONG_PRESS_DURATION) {
-            // Короткий тап - открыть карточку или применить действие
+            // Короткий тап - обработать в зависимости от режима
             const clickedPoint = touchedPointIndex;
+            
+            // Режим соединения точек
+            if (state.connectMode) {
+                if (state.connectFrom === null) {
+                    state.connectFrom = clickedPoint;
+                    showNotification('Выберите вторую точку');
+                } else {
+                    if (state.connectFrom !== clickedPoint) {
+                        const exists = state.connections.some(c =>
+                            (c.from === state.connectFrom && c.to === clickedPoint) ||
+                            (c.from === clickedPoint && c.to === state.connectFrom)
+                        );
+                        if (!exists) {
+                            state.connections.push({ from: state.connectFrom, to: clickedPoint });
+                            showNotification('Точки соединены');
+                        }
+                    }
+                    state.connectFrom = null;
+                }
+                render();
+                return;
+            }
+            
+            // Режим разъединения точек
+            if (state.disconnectMode) {
+                if (state.connectFrom === null) {
+                    state.connectFrom = clickedPoint;
+                    showNotification('Выберите вторую точку');
+                } else {
+                    if (state.connectFrom !== clickedPoint) {
+                        state.connections = state.connections.filter(c =>
+                            !((c.from === state.connectFrom && c.to === clickedPoint) ||
+                              (c.from === clickedPoint && c.to === state.connectFrom))
+                        );
+                        showNotification('Соединение удалено');
+                    }
+                    state.connectFrom = null;
+                }
+                render();
+                return;
+            }
+            
+            // Обычный режим
             state.selectedPoint = clickedPoint;
             
             if (state.mode === 'dev') {
