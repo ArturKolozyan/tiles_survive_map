@@ -1544,6 +1544,26 @@ document.getElementById('cancelLoad').addEventListener('click', () => {
     document.getElementById('loadModal').classList.remove('show');
 });
 
+// Close modals when clicking outside
+document.getElementById('saveModal').addEventListener('click', (e) => {
+    if (e.target.id === 'saveModal') {
+        document.getElementById('saveModal').classList.remove('show');
+    }
+});
+
+document.getElementById('loadModal').addEventListener('click', (e) => {
+    if (e.target.id === 'loadModal') {
+        document.getElementById('loadModal').classList.remove('show');
+    }
+});
+
+// Prevent modal content clicks from closing modal
+document.querySelectorAll('.modal-content').forEach(content => {
+    content.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+});
+
 document.getElementById('startMapBtn').addEventListener('click', async () => {
     const dateInput = document.getElementById('startDateInput').value;
     if (!dateInput) {
@@ -1690,7 +1710,10 @@ async function loadMapList() {
                 </div>
                 <button class="map-item-delete" onclick="deleteMapById(${map.id}, event)">🗑️</button>
             `;
-            item.addEventListener('click', () => loadMapById(map.id));
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                loadMapById(map.id);
+            });
             listEl.appendChild(item);
         });
     } catch (error) {
